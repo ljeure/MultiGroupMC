@@ -81,14 +81,21 @@ Mesh::~Mesh() {}
  @param     direction the direction the nuetron is travelling
  @return    a vector denoting the cell of the location and direction
 */
-std::vector <int> Mesh::getCell(std::vector <double>& position,
+std::vector <int> Mesh::getCell(Point &position,
         std::vector <double>& direction) {
+
+    // convert position to a vector in order to easily iterate over it
+    std::vector <double> vec_position;
+    vec_position.push_back(position.getX());
+    vec_position.push_back(position.getX());
+    vec_position.push_back(position.getX());
+    
     for (int i=0; i<3; ++i) {
-        _cell_num = (int)((position[i] - _boundary_mins[i])/_delta_axes[i]);
+        _cell_num = (int)((vec_position[i] - _boundary_mins[i])/_delta_axes[i]);
         
         // correct error if neutron is on upper boundary of cell
         // the rounding is neaded because decimal accuracy gets off
-        _move_cell = position[i] == _boundary_mins[i] + _cell_num
+        _move_cell = vec_position[i] == _boundary_mins[i] + _cell_num
             * _delta_axes[i] & direction[i] < 0;
         if (_cell_num == _axis_sizes[i] | _move_cell) {
             _cell_num --;
@@ -196,8 +203,18 @@ void Mesh::fillMaterials(Material* material_type,
         _default_direction[i] = 0.0;
     }
 
-    _smallest_cell = getCell(_min_locations, _default_direction);
-    _largest_cell = getCell(_max_locations, _default_direction);
+    // convert vectors to points
+    Point min_point;
+    min_point.setX(_min_locations[0]);
+    min_point.setY(_min_locations[1]);
+    min_point.setZ(_min_locations[2]);
+    Point max_point;
+    max_point.setX(_max_locations[0]);
+    max_point.setY(_max_locations[1]);
+    max_point.setZ(_max_locations[2]);
+
+    _smallest_cell = getCell(min_point, _default_direction);
+    _largest_cell = getCell(max_point, _default_direction);
     
     // fill the cells with material_type
     for (int i=_smallest_cell[0]; i<=_largest_cell[0]; ++i) {
@@ -214,14 +231,21 @@ void Mesh::fillMaterials(Material* material_type,
             the geometry
  @param     position a cartesian coordinate denoting a position in the geometry
 */
-bool Mesh::positionInBounds(std::vector <double> &position) {
+bool Mesh::positionInBounds(Point &position) {
+
+    // convert position to vector in order to easily iterate over it
+    std::vector <double> vec_position;
+    vec_position.push_back(position.getX());
+    vec_position.push_back(position.getX());
+    vec_position.push_back(position.getX());
+
     for (int axis=0; axis<3; ++axis) {
         double _boundary_max = _boundary_mins[axis]
             + _delta_axes[axis] * _axis_sizes[axis];
 
         // check the boundaries
-        if (position[axis] < _boundary_mins[axis]
-                | position[axis] > _boundary_max) {
+        if (vec_position[axis] < _boundary_mins[axis]
+                | vec_position[axis] > _boundary_max) {
             return false;
         }
     }

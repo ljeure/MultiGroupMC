@@ -13,6 +13,7 @@ source += Mesh.cpp
 source += Monte_carlo.cpp
 source += Plotter.cpp
 source += Fission.cpp
+source += ../../OpenMOC/src/Point.cpp
 
 CC = g++
 

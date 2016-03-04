@@ -47,6 +47,7 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
                     num_groups, i);
         }
 
+/*        
         // give results
         double k = tallies[FISSIONS].getCount() /
             (tallies[LEAKS].getCount() + tallies[ABSORPTIONS].getCount());
@@ -55,11 +56,20 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
             + tallies[ABSORPTIONS].getStandardDeviation(n_histories);
         std::cout << "For batch " << batch << ", k = " << k
             << " with standard deviation of " << sumStandardDev << std::endl;
-        first_round = false;
+        double fissions;
+        fissions = tallies[FISSIONS].getCount();
+        std::cout << "fissions: " << fissions/fissions << std::endl;
+        std::cout << "leaks: " << tallies[LEAKS].getCount()/fissions
+            << std::endl;
+        std::cout << "absorptions: " << tallies[ABSORPTIONS].getCount()/fissions
+            << std::endl;
+            first_round = false;
+*/    
     }
-    double mean_crow_distance = tallies[CROWS].getCount()
+/*    double mean_crow_distance = tallies[CROWS].getCount()
         / tallies[NUM_CROWS].getCount();
     std::cout << "Mean crow fly distance = " << mean_crow_distance << std::endl;
+*/
 }
 
 /*
@@ -92,15 +102,17 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     // new way to sample neutron and set its direction
     Neutron neutron(neutron_num);
     neutron.sampleDirection();
-     
+
+    
     // get and set neutron starting poinit
-    std::vector <double> neutron_starting_point;
+    Point neutron_starting_point;
     if (first_round)
         neutron_starting_point = bounds.sampleLocation(&neutron);
-    else
-        neutron_starting_point = fission_banks->sampleSite(&neutron);
-    neutron.setPositionVector(neutron_starting_point);
-    
+//    else
+//        neutron_starting_point = fission_banks->sampleSite(&neutron);
+//    neutron.setPositionVector(neutron_starting_point);
+
+/*    
     // get mesh cell
     std::vector <double> neutron_direction;
     neutron_direction = neutron.getDirectionVector();
@@ -126,7 +138,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         group = neutron.getGroup();
         double neutron_distance;
         neutron_distance = cell_mat->sampleDistance(group, &neutron);
-        std::vector <double> neutron_position;
+        Point neutron_position;
     
         // track neutron until collision or leakage
         while (neutron_distance > 0) {
@@ -229,6 +241,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                         neutron.kill();
                         neutron_distance = tempd;
                         tallies[LEAKS] += 1;
+                        break;
                     }
                 }
             }
@@ -308,7 +321,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
 
     // tally crow distance
     double crow_distance;
-    crow_distance = neutron.getDistance(neutron_starting_point);
+    crow_distance = neutron.getDistance(&neutron_starting_point);
     tallies[CROWS] += crow_distance;
     tallies[NUM_CROWS] += 1;
+*/
 }

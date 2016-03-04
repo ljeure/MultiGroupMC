@@ -15,6 +15,7 @@
 #include "Material.h"
 #include "Boundaries.h"
 #include "Surface.h"
+#include "../../OpenMOC/src/Point.h"
 
 class Mesh {
 public:
@@ -26,8 +27,8 @@ public:
     void fluxClear();
     void fillMaterials(Material* material_type,
             std::vector <std::vector <double> > &material_bounds);
-    bool positionInBounds(std::vector <double> &position);
-    std::vector <int> getCell(std::vector <double>& position,
+    bool positionInBounds(Point &position);
+    std::vector <int> getCell(Point &position,
             std::vector <double>& direction);
     std::vector <double> getCellMax(std::vector <int> &cell_number);
     std::vector <double> getCellMin(std::vector <int> &cell_number);

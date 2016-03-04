@@ -49,9 +49,9 @@ int Neutron::getGroup() {
  @param     distance the distance the neutron should be moved
 */
 void Neutron::move(double distance) {
-    for (int i=0; i<3; ++i) {
-        _xyz[i] += _neutron_direction[i] * distance;
-    }
+    _xyz.setX(_xyz.getX() + _neutron_direction[0] * distance);
+    _xyz.setY(_xyz.getY() + _neutron_direction[1] * distance);
+    _xyz.setZ(_xyz.getZ() + _neutron_direction[2] * distance);
 }
 
 /*
@@ -80,7 +80,12 @@ void Neutron::changeCell(int axis, min_max side) {
  @param     value the value to which the position will be set
 */
 void Neutron::setPosition(int axis, double value) {
-    _xyz[axis] = value;
+    if (axis==0)
+        _xyz.setX(value);
+    if (axis==1)
+        _xyz.setY(value);
+    if (axis==2)
+        _xyz.setZ(value);
 }
 
 /*
@@ -113,14 +118,20 @@ std::vector <int> Neutron::getCell() {
  @return    a double denoting the neutron's position along axis
 */
 double Neutron::getPosition(int axis) {
-    return _xyz[axis];
+    double pos;
+    if (axis==0)
+        pos = _xyz.getX();
+    if (axis==1)
+        pos = _xyz.getY();
+    if (axis==2)
+        pos = _xyz.getZ();
 }
 
 /*
  @brief     gets the position vector of the neutron
  @return    a vector containing the neutron's position
 */
-std::vector <double> Neutron::getPositionVector() {
+Point Neutron::getPositionVector() {
     return _xyz;
 }
 
@@ -147,10 +158,10 @@ std::vector <double> Neutron::getDirectionVector() {
  @param     coord a vector denoting the point to find the neutron's distance from
  @return    the neutron's distance from that point
 */
-double Neutron::getDistance(std::vector <double> &coord) {
-    return sqrt(pow(getPosition(0)-coord[0], 2.0)
-            + pow(getPosition(1)-coord[1], 2.0)
-            + pow(getPosition(2)-coord[2], 2.0));
+double Neutron::getDistance(Point* coord) {
+    double dis;
+    dis = _xyz.distanceToPoint(coord);
+    return dis;
 }
 
 /*
@@ -183,7 +194,7 @@ void Neutron::sampleDirection() {
  @brief     sets the neutron's position
  @param     position the position of the neutron
 */
-void Neutron::setPositionVector(std::vector <double> &position) {
+void Neutron::setPositionVector(Point &position) {
     _xyz = position;
 }
 

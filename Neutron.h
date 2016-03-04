@@ -16,6 +16,7 @@
 #include <stdlib.h>
 
 #include "Surface.h"
+#include "../../OpenMOC/src/Point.h"
 
 class Neutron {
 public:
@@ -29,11 +30,11 @@ public:
     void setCell(std::vector <int> &cell_number);
     void setGroup(int new_group);
     void setPosition(int axis, double value);
-    void setPositionVector(std::vector <double> &position);
+    void setPositionVector(Point &position);
     void sampleDirection();
     double arand();
     double getDirection(int axis);
-    double getDistance(std::vector <double> &coord);
+    double getDistance(Point *coord);
     double getPosition(int axis);
     double x();
     double y();
@@ -45,7 +46,7 @@ public:
     int sampleScatteredGroup(std::vector <double> &scattering_matrix,
             int group);
     std::vector <int> getCell();
-    std::vector <double> getPositionVector();
+    Point getPositionVector();
     std::vector <double> getDirectionVector();
 
 private:
@@ -57,7 +58,7 @@ private:
     int _neutron_group;
 
     /** position of the neutron */
-    std::vector <double> _xyz;
+    Point _xyz;
 
     /** direction of travel of the neutron */
     std::vector <double> _neutron_direction;

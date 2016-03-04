@@ -54,12 +54,28 @@ BoundaryType Boundaries::getSurfaceType(int axis, int side) {
             bounding box
  @return    _dist_location a vector that contains the coordinates of a point
 */
-std::vector <double> Boundaries::sampleLocation(Neutron* neutron) {
-    std::vector <double> _dist_location(3);
-    for (int axis=0; axis<3; ++axis) {
+Point Boundaries::sampleLocation(Neutron* neutron) {
+    //std::vector <double> _dist_location(3);
+/*    for (int axis=0; axis<3; ++axis) {
         double width = getSurfaceCoord(axis, MAX) - getSurfaceCoord(axis, MIN);
         double coord = getSurfaceCoord(axis, MIN) + width * neutron->arand();
         _dist_location[axis] = coord;
     }
-    return _dist_location;
+    //sampled_location.setCoords(_dist_location[0], _dist_location[1],
+    //        _dist_location[2]);
+  */  
+    Point sampled_location;
+    double width = getSurfaceCoord(0, MAX) - getSurfaceCoord(0, MIN);
+    double coord = getSurfaceCoord(0, MIN) + width * neutron->arand();
+    sampled_location.setX(coord);
+    width = getSurfaceCoord(1, MAX) - getSurfaceCoord(1, MIN);
+    coord = getSurfaceCoord(1, MIN) + width * neutron->arand();
+    sampled_location.setY(coord);
+    width = getSurfaceCoord(2, MAX) - getSurfaceCoord(2, MIN);
+    coord = getSurfaceCoord(2, MIN) + width * neutron->arand();
+    sampled_location.setZ(coord);
+    
+    std::cout << "got here\n";
+
+    return sampled_location;
 }

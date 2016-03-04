@@ -10,8 +10,10 @@
 
 #include "Surface.h"
 #include "Neutron.h"
+#include "../../OpenMOC/src/Point.h"
 
 #include <vector>
+#include <iostream>
 
 class Boundaries {
 
@@ -22,7 +24,7 @@ public:
     float getSurfaceCoord(int axis, int side);
     BoundaryType getSurfaceType(int axis, int side);
     void setSurface(Axes axis, min_max side, Surface* surface);
-    std::vector <double> sampleLocation(Neutron* neutron);
+    Point sampleLocation(Neutron* neutron);
 
 private:
 

@@ -14,6 +14,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <algorithm>
+#include "../../OpenMOC/src/Point.h"
 
 #include "Tally.h"
 #include "Mesh.h"
