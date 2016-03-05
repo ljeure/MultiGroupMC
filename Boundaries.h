@@ -24,7 +24,7 @@ public:
     float getSurfaceCoord(int axis, int side);
     BoundaryType getSurfaceType(int axis, int side);
     void setSurface(Axes axis, min_max side, Surface* surface);
-    Point sampleLocation(Neutron* neutron);
+    void sampleLocation(Neutron* neutron);
 
 private:
 

@@ -48,27 +48,22 @@ BoundaryType Boundaries::getSurfaceType(int axis, int side) {
 
 /*
  @brief     function that samples a random location within a bounding box.
- @details   a point is randomly and uniformally sampled in the bounding box 
-            provided in the input.
- @param     bounds a Boundaries object containing the limits of the
-            bounding box
- @return    _dist_location a vector that contains the coordinates of a point
+ @details   a position along each axis is randomly and uniformally sampled in
+            the bounding box. Each positin is set as the neutron's position
+            along that axis.
+ @param     neutron, the Neutron whose position will be set
 */
-Point Boundaries::sampleLocation(Neutron* neutron) {
+void Boundaries::sampleLocation(Neutron* neutron) {
     Point sampled_location;
     double width = getSurfaceCoord(0, MAX) - getSurfaceCoord(0, MIN);
     double coord = getSurfaceCoord(0, MIN) + width * neutron->arand();
-    sampled_location.setX(coord);
+    neutron->setPosition(0, coord);
     
     width = getSurfaceCoord(1, MAX) - getSurfaceCoord(1, MIN);
     coord = getSurfaceCoord(1, MIN) + width * neutron->arand();
-    sampled_location.setY(coord);
+    neutron->setPosition(1, coord);
     
     width = getSurfaceCoord(2, MAX) - getSurfaceCoord(2, MIN);
     coord = getSurfaceCoord(2, MIN) + width * neutron->arand();
-    sampled_location.setZ(coord);
-    
-    std::cout << "got here\n";
-
-    return sampled_location;
+    neutron->setPosition(2, coord);
 }

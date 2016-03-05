@@ -47,7 +47,6 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
                     num_groups, i);
         }
 
-/*        
         // give results
         double k = tallies[FISSIONS].getCount() /
             (tallies[LEAKS].getCount() + tallies[ABSORPTIONS].getCount());
@@ -64,12 +63,11 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
         std::cout << "absorptions: " << tallies[ABSORPTIONS].getCount()/fissions
             << std::endl;
             first_round = false;
-*/    
     }
-/*    double mean_crow_distance = tallies[CROWS].getCount()
+    double mean_crow_distance = tallies[CROWS].getCount()
         / tallies[NUM_CROWS].getCount();
     std::cout << "Mean crow fly distance = " << mean_crow_distance << std::endl;
-*/
+
 }
 
 /*
@@ -99,23 +97,26 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         int neutron_num) {
     const double TINY_MOVE = 1e-10;
     
+    Point* neutron_position = new Point();
+    
     // new way to sample neutron and set its direction
     Neutron neutron(neutron_num);
     neutron.sampleDirection();
 
     
     // get and set neutron starting poinit
-    Point neutron_starting_point;
     if (first_round)
-        neutron_starting_point = bounds.sampleLocation(&neutron);
-//    else
-//        neutron_starting_point = fission_banks->sampleSite(&neutron);
-//    neutron.setPositionVector(neutron_starting_point);
+        bounds.sampleLocation(&neutron);
+    else
+        fission_banks->sampleSite(&neutron);
 
-/*    
     // get mesh cell
     std::vector <double> neutron_direction;
     neutron_direction = neutron.getDirectionVector();
+   
+    Point* neutron_starting_point;
+    neutron_starting_point = neutron.getPositionVector(neutron_starting_point);
+
     std::vector <int> cell;
     cell = mesh.getCell(neutron_starting_point, neutron_direction);
     neutron.setCell(cell);
@@ -138,11 +139,10 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         group = neutron.getGroup();
         double neutron_distance;
         neutron_distance = cell_mat->sampleDistance(group, &neutron);
-        Point neutron_position;
     
         // track neutron until collision or leakage
         while (neutron_distance > 0) {
-            neutron_position = neutron.getPositionVector();
+            neutron_position = neutron.getPositionVector(neutron_position);
 
             // get cell boundaries
             std::vector <double> cell_mins;
@@ -256,13 +256,14 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
 
                 // nudge neutron and find its cell
                 neutron.move(TINY_MOVE);
-                neutron_position = neutron.getPositionVector();
+                neutron_position = neutron.getPositionVector(neutron_position);
                 if (mesh.positionInBounds(neutron_position)) {
                     cell = mesh.getCell(neutron_position, neutron_direction);
                 }
                 neutron.move(-TINY_MOVE);
                 neutron.setCell(cell);
             }
+        
         }
 
         // check interaction
@@ -301,7 +302,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 group = neutron.getGroup();
                 cell = neutron.getCell();
                 cell_mat = mesh.getMaterial(cell);
-                neutron_position = neutron.getPositionVector();
+                neutron_position = neutron.getPositionVector(neutron_position);
 
                 // fission event
                 if (cell_mat->sampleFission(group, &neutron) == 1) {
@@ -316,13 +317,17 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 // end neutron history
                 neutron.kill();
             }
+            
         }
+  
     }
 
     // tally crow distance
     double crow_distance;
-    crow_distance = neutron.getDistance(&neutron_starting_point);
+    crow_distance = neutron.getDistance(neutron_starting_point);
     tallies[CROWS] += crow_distance;
     tallies[NUM_CROWS] += 1;
-*/
+
+    //delete neutron_position;
+    //delete neutron_starting_point;
 }

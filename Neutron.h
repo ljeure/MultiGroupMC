@@ -46,7 +46,7 @@ public:
     int sampleScatteredGroup(std::vector <double> &scattering_matrix,
             int group);
     std::vector <int> getCell();
-    Point getPositionVector();
+    Point* getPositionVector(Point* position);
     std::vector <double> getDirectionVector();
 
 private:
