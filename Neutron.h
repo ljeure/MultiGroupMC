@@ -8,6 +8,8 @@
 #ifndef NEUTRON_H
 #define NEUTRON_H
 
+//#include "precision.h"
+
 #include <vector>
 #include <cmath>
 #include <stdio.h>

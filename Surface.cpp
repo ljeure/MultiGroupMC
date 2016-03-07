@@ -12,7 +12,7 @@
  @param type the type of boundary
  @param position the position of the boundary
 */
-Surface::Surface(BoundaryType type, double position) {
+MCSurface::MCSurface(BoundaryType type, double position) {
     _boundary_type = type;
     _position = position;
 }
@@ -20,13 +20,13 @@ Surface::Surface(BoundaryType type, double position) {
 /*
  @brief deconstructor
 */
-Surface::~Surface() {}
+MCSurface::~MCSurface() {}
 
 /*
  @brief returns the location of the boundary
  @return a double denoting the location of the boundary
 */
-double Surface::getPosition() {
+double MCSurface::getPosition() {
     return _position;
 }
 
@@ -34,6 +34,6 @@ double Surface::getPosition() {
  @brief returns the type of the boundary
  @return a BoundaryType denoting the type of the boundary
 */
-BoundaryType Surface::getType() {
+BoundaryType MCSurface::getType() {
     return _boundary_type;
 }

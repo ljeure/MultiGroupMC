@@ -122,7 +122,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     neutron.setCell(cell);
 
     // set neutron group
-    Material* cell_mat;
+    MCMaterial* cell_mat;
     int group;
     cell_mat = mesh.getMaterial(cell);
     std::vector <double> chi(num_groups);

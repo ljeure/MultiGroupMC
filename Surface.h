@@ -8,10 +8,12 @@
 #ifndef Surface_H
 #define Surface_H
 
+//#include "precision.h"
+
 enum BoundaryType {
-    VACUUM,
-    REFLECTIVE,
-    BOUNDARY_NONE
+    MCVACUUM,
+    MCREFLECTIVE,
+    MCBOUNDARY_NONE
 };
 
 // enumerations used when talking about boundaries
@@ -23,11 +25,11 @@ enum Axes {
     Z
 };
 
-class Surface {
+class MCSurface {
 
 public:
-    Surface(BoundaryType type, double position);
-    virtual ~Surface();
+    MCSurface(BoundaryType type, double position);
+    virtual ~MCSurface();
 
     double getPosition();
     BoundaryType getType();

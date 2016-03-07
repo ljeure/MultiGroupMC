@@ -8,6 +8,8 @@
 #ifndef PLOTTER_H
 #define PLOTTER_H
 
+//#include "precision.h"
+
 #include <fstream>
 #include <vector>
 

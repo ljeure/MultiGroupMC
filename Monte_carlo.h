@@ -8,6 +8,8 @@
 #ifndef MONTE_CARLO_H
 #define MONTE_CARLO_H
 
+//#include "precision.h"
+
 #include <iostream>
 #include <vector>
 #include <time.h>

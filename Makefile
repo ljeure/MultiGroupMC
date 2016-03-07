@@ -14,6 +14,16 @@ source += Monte_carlo.cpp
 source += Plotter.cpp
 source += Fission.cpp
 source += ../../OpenMOC/src/Point.cpp
+source += ../../OpenMOC/src/Universe.cpp
+source += ../../OpenMOC/src/Python.cpp
+source += ../../OpenMOC/src/LocalCoords.cpp
+source += ../../OpenMOC/src/boundary_type.cpp
+source += ../../OpenMOC/src/Material.cpp
+source += ../../OpenMOC/src/linalg.cpp
+source += ../../OpenMOC/src/Vector.cpp
+source += ../../OpenMOC/src/Matrix.cpp
+
+CFLAGS += -DFP_PRECISION=double
 
 CC = g++
 

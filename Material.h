@@ -8,6 +8,8 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+//#include "precision.h"
+
 #include <iostream>
 #include <vector>
 #include <time.h>
@@ -16,14 +18,14 @@
 
 #include "Neutron.h"
 
-class Material {
+class MCMaterial {
 
 public:
 
-    Material(std::vector <double> &sigma_t, 
+    MCMaterial(std::vector <double> &sigma_t, 
             std::vector <std::vector <double> > &sigma_s, double nu, 
             std::vector <double> &sigma_f, std::vector <double> &chi);
-    virtual ~Material();
+    virtual ~MCMaterial();
     
     double getSigmaT(int group);
     double getSigmaF(int group);

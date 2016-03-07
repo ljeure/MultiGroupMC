@@ -8,6 +8,8 @@
 #ifndef TALLY_H
 #define TALLY_H
 
+//#include "precision.h"
+
 class Tally {
 
 public:    

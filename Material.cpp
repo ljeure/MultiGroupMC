@@ -16,7 +16,7 @@
  @param     sigma_f a vector containing the fission cross section
  @param     chi a vector the initial energy distribution of neutrons
 */
-Material::Material(std::vector <double> &sigma_t, 
+MCMaterial::MCMaterial(std::vector <double> &sigma_t, 
         std::vector <std::vector <double> > &sigma_s, double nu, 
         std::vector <double> &sigma_f, std::vector <double> &chi) {
 
@@ -44,7 +44,7 @@ Material::Material(std::vector <double> &sigma_t,
 /*
  @brief     deconstructor
 */
-Material::~Material() {}
+MCMaterial::~MCMaterial() {}
 
 /*
  @brief     returns sigma_t for the material, a standard vector
@@ -52,7 +52,7 @@ Material::~Material() {}
  @param     group the energy group of the neutron
  @return    sigma_t, the total cross section
 */
-double Material::getSigmaT(int group) {
+double MCMaterial::getSigmaT(int group) {
     return _sigma_t[group];
 }
 
@@ -62,7 +62,7 @@ double Material::getSigmaT(int group) {
  @param     group the energy group of the neutron
  @return    sigma_s, the scatttering cross section
 */
-std::vector <double> Material::getSigmaS(int group)  {
+std::vector <double> MCMaterial::getSigmaS(int group)  {
     return _sigma_s[group];
 }
 
@@ -71,7 +71,7 @@ std::vector <double> Material::getSigmaS(int group)  {
             per fission event
  @return    nu, the average number of neutrons released per fission event
 */
-double Material::getNu() {
+double MCMaterial::getNu() {
     return _nu;
 }
 
@@ -81,7 +81,7 @@ double Material::getNu() {
  @param     group the energy group of the neutron
  @return    sigma_f, the fission cross section
 */
-double Material::getSigmaF(int group) {
+double MCMaterial::getSigmaF(int group) {
     return _sigma_f[group];
 }
 
@@ -91,7 +91,7 @@ double Material::getSigmaF(int group) {
  @param     group the energy group of the neutron
  @return    chi, the neutron emission spectrum
 */
-double Material::getChi(int group) {
+double MCMaterial::getChi(int group) {
     return _chi[group];
 }
 
@@ -101,7 +101,7 @@ double Material::getChi(int group) {
  @param     group the energy group of the neutron
  @return    sigma_a, the absorption cross section
 */
-double Material::getSigmaA(int group) {
+double MCMaterial::getSigmaA(int group) {
     return _sigma_a[group];
 }
 
@@ -113,7 +113,7 @@ double Material::getSigmaA(int group) {
  @param     group an int denoting the energy group of the neutron 
  @return    an interaction type (0 = scattering, 1 = absorption)
 */
-int Material::sampleInteraction(int group, Neutron *neutron) {
+int MCMaterial::sampleInteraction(int group, Neutron *neutron) {
     return (int) (neutron->arand() < _sigma_a[group] / _sigma_t[group]);
 }
 
@@ -125,7 +125,7 @@ int Material::sampleInteraction(int group, Neutron *neutron) {
  @param     group an int denoting the energy group of the neutron
  @return    a randomly sampled distance in [0, infinity)
 */
-double Material::sampleDistance(int group, Neutron *neutron) {
+double MCMaterial::sampleDistance(int group, Neutron *neutron) {
     return -log(neutron->arand()) / _sigma_t[group];
 }
 
@@ -137,7 +137,7 @@ double Material::sampleDistance(int group, Neutron *neutron) {
  @param     group contains the energy group of the neutron
  @return    an interaction type (0 = capture, 1 = fission)
 */
-int Material::sampleFission(int group, Neutron *neutron) {
+int MCMaterial::sampleFission(int group, Neutron *neutron) {
     int fission = neutron->arand() < _sigma_f[group] / _sigma_a[group];
     return fission;
 }
@@ -146,7 +146,7 @@ int Material::sampleFission(int group, Neutron *neutron) {
  @brief     samples the nunber of neutrons produced from a fission event
  @return    number of neutrons emitted from the sampled fission event
 */
-int Material::sampleNumFission(Neutron *neutron) {
+int MCMaterial::sampleNumFission(Neutron *neutron) {
     int lower = (int) _nu;
     int add = (int) (neutron->arand() < _nu -lower);
     return lower + add;

@@ -8,6 +8,8 @@
 #ifndef MESH_H
 #define MESH_H
 
+//#include "precision.h"
+
 #include <iostream>
 #include <vector>
 #include <math.h>
@@ -20,12 +22,12 @@
 class Mesh {
 public:
     Mesh(Boundaries bounds, double delta_x, double delta_y, double delta_z,
-            Material* default_material, int num_groups);
+            MCMaterial* default_material, int num_groups);
     virtual ~Mesh();
 
     void fluxAdd(std::vector <int> &cell, double distance, int group);
     void fluxClear();
-    void fillMaterials(Material* material_type,
+    void fillMaterials(MCMaterial* material_type,
             std::vector <std::vector <double> > &material_bounds);
     bool positionInBounds(Point* position);
     std::vector <int> getCell(Point* position,
@@ -33,7 +35,7 @@ public:
     std::vector <double> getCellMax(std::vector <int> &cell_number);
     std::vector <double> getCellMin(std::vector <int> &cell_number);
     std::vector <std::vector <std::vector <std::vector <double> > > > getFlux();
-    Material* getMaterial(std::vector <int> &cell_number);
+    MCMaterial* getMaterial(std::vector <int> &cell_number);
     
 private:
 
@@ -74,7 +76,7 @@ private:
     std::vector <std::vector <std::vector <std::vector <double> > > > _flux;
     
     /** materials of each cell */
-    std::vector <std::vector <std::vector <Material*> > > _cell_materials;
+    std::vector <std::vector <std::vector <MCMaterial*> > > _cell_materials;
 
     /** a cell number */
     int _cell_num;
