@@ -1,6 +1,5 @@
 program = monte_carlo
 
-obj = $(source:.cpp=.o)
 
 headers = $(source:.cpp=.h)
 source = Boundaries.cpp
@@ -15,15 +14,21 @@ source += Plotter.cpp
 source += Fission.cpp
 source += ../../OpenMOC/src/Point.cpp
 source += ../../OpenMOC/src/Universe.cpp
+source += ../../OpenMOC/src/Surface.cpp
 source += ../../OpenMOC/src/LocalCoords.cpp
+source += ../../OpenMOC/src/Cell.cpp
+srouce += ../../OpenMOC/src/log.cpp
 source += ../../OpenMOC/src/Material.cpp
-source += ../../OpenMOC/src/linalg.cpp
-source += ../../OpenMOC/src/Vector.cpp
-source += ../../OpenMOC/src/Matrix.cpp
+#source += ../../OpenMOC/src/linalg.cpp
+#source += ../../OpenMOC/src/Vector.cpp
+#source += ../../OpenMOC/src/Matrix.cpp
+
+obj = $(source:.cpp=.o)
 
 CC = g++
 
 CFLAGS := -DFP_PRECISION=double
+CFLAGS += -DVEC_LENGTH=8
 
 $(program): $(obj) $(headers)
 	$(CC) $(CFLAGS) $(obj) -o $@ -lm
