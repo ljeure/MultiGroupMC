@@ -12,7 +12,6 @@
 */
 Mesh::Mesh(Boundaries bounds, double delta_x, double delta_y, double delta_z,
         MCMaterial* default_material, int num_groups) {
-    
     // save deltas 
     _delta_axes.push_back(delta_x);
     _delta_axes.push_back(delta_y);

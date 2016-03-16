@@ -5,8 +5,6 @@
  @date      January 9 2016
 */
 
-//#define FP_PRECISION
-
 #include <iostream>
 #include <vector>
 #include <time.h>
@@ -95,7 +93,8 @@ int main() {
     
     // create materials
     MCMaterial fuel(fuel_sigma_t, fuel_sigma_s, nu, fuel_sigma_f, fuel_chi);
-    MCMaterial water(water_sigma_t, water_sigma_s, nu, water_sigma_f, water_chi);
+    MCMaterial water(water_sigma_t, water_sigma_s, nu,
+            water_sigma_f, water_chi);
 
     // create mesh
     MCMaterial* point_water = &water;
@@ -119,16 +118,15 @@ int main() {
 
     // initialize lattice
     Lattice lattice;
-//    lattice.setNumX(9);
-//    lattice.setNumY(9);
-//    lattice.setNumZ(9);
+    lattice.setNumX(9);
+    lattice.setNumY(9);
+    lattice.setWidth(4.0/9.0, 4.0/9.0);
 
-/*
     // simulate neutron histories
-    int num_neutrons = 1000000;
+    int num_neutrons = 10000;
     int num_batches = 3;
     generateNeutronHistories(num_neutrons, test_boundary,
-            test_mesh, num_batches, num_groups);
+            test_mesh, lattice, num_batches, num_groups);
 
     // plot neutron flux
     std::vector <std::vector <std::vector <std::vector <double> > > > flux =
@@ -137,6 +135,7 @@ int main() {
 
     // run python script to get flux plots
     system("python Flux_parser.py");
+/*
 */
     std::cout << std::endl;
     return 0;

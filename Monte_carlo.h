@@ -8,8 +8,6 @@
 #ifndef MONTE_CARLO_H
 #define MONTE_CARLO_H
 
-//#include "precision.h"
-
 #include <iostream>
 #include <vector>
 #include <time.h>
@@ -17,6 +15,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include "../../OpenMOC/src/Point.h"
+#include "../../OpenMOC/src/Universe.h"
 
 #include "Tally.h"
 #include "Mesh.h"
@@ -27,10 +26,10 @@ enum tally_names {CROWS, NUM_CROWS, LEAKS, ABSORPTIONS, FISSIONS};
 enum fission_bank_names {OLD, NEW};
 
 void generateNeutronHistories(int n_histories, Boundaries bounds,
-        Mesh &mesh, int num_batches, int num_groups);
+        Mesh &mesh, Lattice &lattice, int num_batches, int num_groups);
 
 void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
-        bool first_round, Mesh &mesh, Fission* fission_banks, int num_groups,
+        bool first_round, Mesh &mesh, Lattice &lattice, Fission* fission_banks, int num_groups,
         int neutron_num);
 
 #endif

@@ -20,7 +20,7 @@
  @param     num_groups the number of neutron energy groups
 */
 void generateNeutronHistories(int n_histories, Boundaries bounds,
-        Mesh &mesh, int num_batches, int num_groups) {
+        Mesh &mesh, Lattice &lattice, int num_batches, int num_groups) {
 
     // create arrays for tallies and fissions
     std::vector <Tally> tallies(5);
@@ -43,8 +43,8 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
 
         // simulate neutron behavior
         for (int i=0; i<n_histories; ++i) {
-            transportNeutron(bounds, tallies, first_round, mesh, &fission_banks,
-                    num_groups, i);
+            transportNeutron(bounds, tallies, first_round, mesh, lattice,
+                    &fission_banks, num_groups, i);
         }
 
         // give results
@@ -93,9 +93,9 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
  @param     num_groups the number of neutron energy groups
 */
 void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
-        bool first_round, Mesh &mesh, Fission* fission_banks, int num_groups,
-        int neutron_num) {
-    const double TINY_MOVE = 1e-10;
+        bool first_round, Mesh &mesh, Lattice &lattice, Fission* fission_banks,
+        int num_groups, int neutron_num) {
+    //const double TINY_MOVE = 1e-10;
     
     Point* neutron_position = new Point();
     
@@ -150,6 +150,13 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             cell_mins = mesh.getCellMin(cell);
             cell_maxes = mesh.getCellMax(cell);
 
+            //debugging
+/*            std::cout << "\nneutron position " 
+            << neutron_position->getX() << " "
+            << neutron_position->getY() << " "
+            << neutron_position->getZ() << "\n";
+*/
+
             // calculate distances to cell boundaries
             std::vector <std::vector <double> > distance_to_cell_edge(3);
             for (int axis=0; axis<3; ++axis) {
@@ -181,6 +188,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                     // along the direction vector to the boundary being tested.
                     r = distance_to_cell_edge[axis][side]
                         / neutron.getDirection(axis);
+
+                    // 0 doesn't work because of floating point errors
                     if (r > 0 & r < tempd) {
                         tempd = r;
                         cell_lim_bound.clear();
@@ -207,9 +216,16 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 if (std::find(cell_lim_bound.begin(),
                             cell_lim_bound.end(),sur_side)
                         != cell_lim_bound.end()) {
-                    if (cell_mins[axis] == bounds.getSurfaceCoord(axis, side)
-                            | cell_maxes[axis] == 
-                            bounds.getSurfaceCoord(axis, side)) {
+                    //std::cout << " cell lim bound: " << sur_side << std::endl;
+
+                    // if the cell lim bound is a box boundary
+/*                    if (abs(cell_mins[axis] - bounds.getSurfaceCoord(axis, side))
+                            > 1e-10 | abs(cell_maxes[axis] -
+                            bounds.getSurfaceCoord(axis, side)) > 1e-10) {
+*/
+                    if (cell_mins[axis] == bounds.getSurfaceCoord(axis, side) 
+                            | cell_maxes[axis] == bounds.getSurfaceCoord(axis,
+                                side)) {
                         box_lim_bound.push_back(sur_side);
                     }
                 }
@@ -250,10 +266,14 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             neutron_distance -= tempd;
 
             // get new neutron cell
-            if (neutron_distance > 0.0) {
+            if (neutron_distance > 0) {
                 neutron_direction = neutron.getDirectionVector();
                 cell = mesh.getCell(neutron_position, neutron_direction);
-
+                
+/*                std::cout << "neutron z directoin " << neutron_direction[2]
+                    << std::endl;
+                std::cout << "neutron z cell " << cell[2] << std::endl;
+*/
                 // nudge neutron and find its cell
                 neutron.move(TINY_MOVE);
                 neutron_position = neutron.getPositionVector(neutron_position);

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 num_groups = 2;
 x_cells = 9;
 y_cells = 9;
-z_cells = 9;
+z_cells = 1;
 
 
 '''
@@ -52,7 +52,7 @@ with open('flux_plot.txt', 'r') as fh:
                             flux_list[g*x_cells*y_cells*z_cells \
                             + i*y_cells*z_cells + j*z_cells + k]
 
-    index = 1
+    index = 0
     for g in range(num_groups):
         plot_heat_map(flux_to_plot[g], index, repeat = 5,
                 title = ('Group ' + str(g+1)))
