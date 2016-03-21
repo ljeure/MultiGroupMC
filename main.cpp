@@ -92,13 +92,13 @@ int main() {
     double nu = 2.4;
     
     // create materials
-    MCMaterial fuel(fuel_sigma_t, fuel_sigma_s, nu, fuel_sigma_f, fuel_chi);
-    MCMaterial water(water_sigma_t, water_sigma_s, nu,
+    MCMaterial fuel(1, fuel_sigma_t, fuel_sigma_s, nu, fuel_sigma_f, fuel_chi);
+    MCMaterial water(0, water_sigma_t, water_sigma_s, nu,
             water_sigma_f, water_chi);
 
     // create mesh
     MCMaterial* point_water = &water;
-    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0/9.0, point_water,
+    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 1.0, point_water,
             num_groups);
 
     // fill mesh with some material
@@ -135,8 +135,8 @@ int main() {
 
     // run python script to get flux plots
     system("python Flux_parser.py");
-/*
-*/
+
     std::cout << std::endl;
     return 0;
-}
+
+    }

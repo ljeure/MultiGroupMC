@@ -16,11 +16,12 @@
  @param     sigma_f a vector containing the fission cross section
  @param     chi a vector the initial energy distribution of neutrons
 */
-MCMaterial::MCMaterial(std::vector <double> &sigma_t, 
+MCMaterial::MCMaterial(int id, std::vector <double> &sigma_t, 
         std::vector <std::vector <double> > &sigma_s, double nu, 
         std::vector <double> &sigma_f, std::vector <double> &chi) {
 
     // store variables
+    _id = id;
     _sigma_t = sigma_t;
     _sigma_s = sigma_s;
     _nu = nu;
@@ -45,6 +46,14 @@ MCMaterial::MCMaterial(std::vector <double> &sigma_t,
  @brief     deconstructor
 */
 MCMaterial::~MCMaterial() {}
+
+/*
+ @brief     return the id number of the material
+ @return    the id number of the material
+*/
+int MCMaterial::getId() {
+    return _id;
+}
 
 /*
  @brief     returns sigma_t for the material, a standard vector

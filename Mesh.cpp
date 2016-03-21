@@ -12,6 +12,7 @@
 */
 Mesh::Mesh(Boundaries bounds, double delta_x, double delta_y, double delta_z,
         MCMaterial* default_material, int num_groups) {
+
     // save deltas 
     _delta_axes.push_back(delta_x);
     _delta_axes.push_back(delta_y);
@@ -251,4 +252,13 @@ bool Mesh::positionInBounds(Point* position) {
         }
     }
     return true;
+}
+
+/*
+ @brief     returns the number of cells along an axis
+ @param     axis an int denoting the axis in question
+ @return    the number of cells along that axis
+*/
+int Mesh::getNumCells(int axis) {
+    return _axis_sizes[axis];
 }

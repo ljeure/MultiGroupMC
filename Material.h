@@ -22,7 +22,7 @@ class MCMaterial {
 
 public:
 
-    MCMaterial(std::vector <double> &sigma_t, 
+    MCMaterial(int id, std::vector <double> &sigma_t, 
             std::vector <std::vector <double> > &sigma_s, double nu, 
             std::vector <double> &sigma_f, std::vector <double> &chi);
     virtual ~MCMaterial();
@@ -37,9 +37,11 @@ public:
     double sampleDistance(int group, Neutron *neutron);
     int sampleFission(int group, Neutron *neutron);
     int sampleNumFission(Neutron *neutron);
-
+    int getId();
 private:
 
+    /** ID number of material */
+    int _id;
     /** total cross sections */
     std::vector <double> _sigma_t;
 

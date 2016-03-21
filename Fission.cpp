@@ -11,8 +11,8 @@
  @brief     constructor for Fission class
 */
 Fission::Fission() {
-    _old_fission_bank = new std::vector <Point*>;
-    _new_fission_bank = new std::vector <Point*>;
+    _old_fission_bank = new std::vector <Point>;
+    _new_fission_bank = new std::vector <Point>;
 }
 
 /*
@@ -40,18 +40,22 @@ void Fission::newBatch() {
 */
 void Fission::sampleSite(Neutron *neutron) {
     int index = neutron->rand() % _old_fission_bank->size();
-    Point* site;
+    Point site;
     site = _old_fission_bank->at(index);
-    neutron->setPosition(0, site->getX());
-    neutron->setPosition(1, site->getY());
-    neutron->setPosition(2, site->getZ());
+    std::cout << "site within fissions "
+        << site.getX() << " "
+        << site.getY() << " "
+        << site.getZ() << std::endl;
+    neutron->setPosition(0, site.getX());
+    neutron->setPosition(1, site.getY());
+    neutron->setPosition(2, site.getZ());
 }
 
 /*
  @brief     add a location to new_fission_bank
  @param     position a position to be added
 */
-void Fission::add(Point* position) {
+void Fission::add(Point position) {
     //Point* real_position = new Point();
     //real_position->setX(position->getX());
     //*real_position = *position;

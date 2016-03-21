@@ -25,6 +25,7 @@ public:
             MCMaterial* default_material, int num_groups);
     virtual ~Mesh();
 
+    int getNumCells(int axis);
     void fluxAdd(std::vector <int> &cell, double distance, int group);
     void fluxClear();
     void fillMaterials(MCMaterial* material_type,
