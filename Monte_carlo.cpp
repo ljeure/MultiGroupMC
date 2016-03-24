@@ -95,7 +95,7 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
 void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         bool first_round, Mesh &mesh, Lattice &lattice, Fission* fission_banks,
         int num_groups, int neutron_num) {
-    //const double TINY_MOVE = 1e-10;
+
     const double BOUNDARY_ERROR = 1e-10;
     
     Point* neutron_position = new Point();
@@ -109,10 +109,10 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         bounds.sampleLocation(&neutron);
     else {
         fission_banks->sampleSite(&neutron);
-        std::cout << "neutron starting position: "
+  /*      std::cout << "neutron starting position: "
             << neutron.getPosition(0) << " " << neutron.getPosition(1) << " "
             << neutron.getPosition(2) << std::endl;
-    }
+  */  }
 
     // get mesh cell
     std::vector <double> neutron_direction;
@@ -143,6 +143,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         group = neutron.getGroup();
         double neutron_distance;
         neutron_distance = cell_mat->sampleDistance(group, &neutron);
+//        std::cout << "sampled neutron distance " <<
+//            neutron_distance << std::endl;
     
         // track neutron until collision or leakage
         while (neutron_distance > BOUNDARY_ERROR) {
@@ -159,8 +161,17 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 << neutron_position->getX() << " "
                 << neutron_position->getY() << " "
                 << neutron_position->getZ() << "\n";
+            std::cout << "neutron distance " << neutron_distance << std::endl;
             std::cout << "cell: " << cell[0] << " " << cell[1] << " " << cell[2]
                 << std::endl;
+            std::cout << "cell max "
+                << cell_maxes[0] << " "
+                << cell_maxes[1] << " "
+                << cell_maxes[2] << std::endl;
+            std::cout << "cell min "
+                << cell_mins[0] << " "
+                << cell_mins[1] << " "
+                << cell_mins[2] << std::endl;
 */
             // calculate distances to cell boundaries
             std::vector <std::vector <double> > distance_to_cell_edge(3);
@@ -171,7 +182,15 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 distance_to_cell_edge[axis][1] =
                     cell_maxes[axis] - neutron.getPosition(axis);
             }
-
+/*            std::cout << "distance to cell min "
+                << distance_to_cell_edge[0][0] << " "
+                << distance_to_cell_edge[1][0] << " "
+                << distance_to_cell_edge[2][0] << std::endl;
+            std::cout << "distance to cell max "
+                << distance_to_cell_edge[0][1] << " "
+                << distance_to_cell_edge[1][1] << " "
+                << distance_to_cell_edge[2][1] << std::endl;
+*/
             // create lim_bounds
             std::vector <int> cell_lim_bound;
             std::vector <int> box_lim_bound;
@@ -193,6 +212,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                     // along the direction vector to the boundary being tested.
                     r = distance_to_cell_edge[axis][side]
                         / neutron.getDirection(axis);
+  //                  std::cout << "r " << r << std::endl;
 
                     if (r > BOUNDARY_ERROR & r < tempd) {
                         tempd = r;
@@ -206,8 +226,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             }
 
             // move neutron
-/*            neutron.move(tempd);
-            std::cout << "neutron moved " << tempd << std::endl;
+            neutron.move(tempd);
+/*            std::cout << "neutron moved " << tempd << std::endl;
             std::cout << "neutron moved to new position: "
             << neutron_position->getX() << " "
             << neutron_position->getY() << " "
@@ -301,6 +321,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
 
                 // sample scattered direction
                 neutron.sampleDirection();
+  //              std::cout << "neutron scattered" << std::endl;
 
                 // sample new energy group
                 int new_group;
@@ -344,9 +365,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 // end neutron history
                 neutron.kill();
             }
-            
         }
-  
     }
 
     // tally crow distance
@@ -354,5 +373,4 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     crow_distance = neutron.getDistance(neutron_starting_point);
     tallies[CROWS] += crow_distance;
     tallies[NUM_CROWS] += 1;
-
 }

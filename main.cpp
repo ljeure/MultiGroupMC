@@ -98,7 +98,7 @@ int main() {
 
     // create mesh
     MCMaterial* point_water = &water;
-    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 1.0, point_water,
+    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, point_water,
             num_groups);
 
     // fill mesh with some material
@@ -123,7 +123,7 @@ int main() {
     lattice.setWidth(4.0/9.0, 4.0/9.0);
 
     // simulate neutron histories
-    int num_neutrons = 10000;
+    int num_neutrons = 1000000;
     int num_batches = 3;
     generateNeutronHistories(num_neutrons, test_boundary,
             test_mesh, lattice, num_batches, num_groups);

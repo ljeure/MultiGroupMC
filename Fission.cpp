@@ -31,6 +31,8 @@ void Fission::newBatch() {
     _temp_fission_bank = _old_fission_bank;
     _old_fission_bank = _new_fission_bank;
     _new_fission_bank = _temp_fission_bank;
+    for (int i; i=0; i < _new_fission_bank->size())
+        delete _new_fission_bank->at(i);
     _new_fission_bank->clear();
 }
 
@@ -42,10 +44,6 @@ void Fission::sampleSite(Neutron *neutron) {
     int index = neutron->rand() % _old_fission_bank->size();
     Point* site;
     site = _old_fission_bank->at(index);
-    std::cout << "site within fissions "
-        << site->getX() << " "
-        << site->getY() << " "
-        << site->getZ() << std::endl;
     neutron->setPosition(0, site->getX());
     neutron->setPosition(1, site->getY());
     neutron->setPosition(2, site->getZ());
@@ -56,11 +54,9 @@ void Fission::sampleSite(Neutron *neutron) {
  @param     position a position to be added
 */
 void Fission::add(Point* position) {
-    std::cout << "fission event at "
-        << position->getX() << " "
-        << position->getY() << " "
-        << position->getZ() << std::endl;
     Point* fission_site = new Point();
-    fission_site = position;
+    fission_site->setX(position->getX());
+    fission_site->setY(position->getY());
+    fission_site->setZ(position->getZ());
     _new_fission_bank->push_back(fission_site);
 }
