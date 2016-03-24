@@ -56,8 +56,11 @@ void Fission::sampleSite(Neutron *neutron) {
  @param     position a position to be added
 */
 void Fission::add(Point* position) {
-    //Point* real_position = new Point();
-    //real_position->setX(position->getX());
-    //*real_position = *position;
-    _new_fission_bank->push_back(position);
+    std::cout << "fission event at "
+        << position->getX() << " "
+        << position->getY() << " "
+        << position->getZ() << std::endl;
+    Point* fission_site = new Point();
+    fission_site = position;
+    _new_fission_bank->push_back(fission_site);
 }

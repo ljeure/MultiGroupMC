@@ -129,11 +129,11 @@ double Neutron::getPosition(int axis) {
 
 /*
  @brief     gets the position vector of the neutron
- @return    a vector containing the neutron's position
+ @param     a Point* to be pointed at a Point containing the neutron's position
+ @return    the Point* pointing at a Point containing the neutron's position
 */
-Point* Neutron::getPositionVector(Point* position) {
+void Neutron::getPositionVector(Point* &position) {
     position = &_xyz;
-    return position;
 }
 
 /*

@@ -34,6 +34,7 @@ public:
     void setPosition(int axis, double value);
     void setPositionVector(Point &position);
     void sampleDirection();
+    void getPositionVector(Point* &position);
     double arand();
     double getDirection(int axis);
     double getDistance(Point *coord);
@@ -48,7 +49,6 @@ public:
     int sampleScatteredGroup(std::vector <double> &scattering_matrix,
             int group);
     std::vector <int> getCell();
-    Point* getPositionVector(Point* position);
     std::vector <double> getDirectionVector();
 
 private:

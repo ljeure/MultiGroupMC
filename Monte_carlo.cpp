@@ -119,7 +119,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     neutron_direction = neutron.getDirectionVector();
    
     Point* neutron_starting_point;
-    neutron_starting_point = neutron.getPositionVector(neutron_starting_point);
+    neutron.getPositionVector(neutron_starting_point);
 
     std::vector <int> cell;
     cell = mesh.getCell(neutron_starting_point, neutron_direction);
@@ -146,7 +146,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     
         // track neutron until collision or leakage
         while (neutron_distance > BOUNDARY_ERROR) {
-            neutron_position = neutron.getPositionVector(neutron_position);
+            neutron.getPositionVector(neutron_position);
 
             // get cell boundaries
             std::vector <double> cell_mins;
@@ -277,7 +277,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 
                 // nudge neutron and find its cell
                 neutron.move(TINY_MOVE);
-                neutron_position = neutron.getPositionVector(neutron_position);
+                neutron.getPositionVector(neutron_position);
                 if (mesh.positionInBounds(neutron_position)) {
                     cell = mesh.getCell(neutron_position, neutron_direction);
                 }
@@ -323,7 +323,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 group = neutron.getGroup();
                 cell = neutron.getCell();
                 cell_mat = mesh.getMaterial(cell);
-                neutron_position = neutron.getPositionVector(neutron_position);
+                neutron.getPositionVector(neutron_position);
 
                 // fission event
                 if (cell_mat->sampleFission(group, &neutron) == 1) {
