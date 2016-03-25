@@ -11,7 +11,7 @@
  @brief     constructor for Mesh class
 */
 Mesh::Mesh(Boundaries bounds, double delta_x, double delta_y, double delta_z,
-        MCMaterial* default_material, int num_groups) {
+        Material* default_material, int num_groups) {
 
     // save deltas 
     _delta_axes.push_back(delta_x);
@@ -92,17 +92,6 @@ std::vector <int> Mesh::getCell(Point* position,
     
     for (int i=0; i<3; ++i) {
         _cell_num = (int)((vec_position[i] - _boundary_mins[i])/_delta_axes[i]);
-        
-        // correct error if neutron is on upper boundary of cell
-        // the rounding is neaded because decimal accuracy gets off
-        _move_cell = vec_position[i] == _boundary_mins[i] + _cell_num
-            * _delta_axes[i] & direction[i] < 0;
-        if (_cell_num == _axis_sizes[i] | _move_cell) {
-            _cell_num --;
-        }
-        if (_cell_num == -1) {
-            _cell_num = 0;
-        }
         _cell_num_vector[i] =_cell_num;
     }
     return _cell_num_vector;
@@ -177,8 +166,8 @@ std::vector <double> Mesh::getCellMin(std::vector <int> &cell_number) {
             material of
  @return    the material of the cell
 */
-MCMaterial* Mesh::getMaterial(std::vector <int> &cell_number) {
-    MCMaterial* mat;
+Material* Mesh::getMaterial(std::vector <int> &cell_number) {
+    Material* mat;
     mat = _cell_materials[cell_number[0]][cell_number[1]][cell_number[2]];
     return mat;
 }
@@ -189,7 +178,7 @@ MCMaterial* Mesh::getMaterial(std::vector <int> &cell_number) {
  @param     locations should be a 3x2 vector with the maxes and mins of the area
             to be filled in each direction
 */
-void Mesh::fillMaterials(MCMaterial* material_type,
+void Mesh::fillMaterials(Material* material_type,
         std::vector <std::vector <double> > &material_bounds) {
     
     // copy the value of material_bounds to locations and nudge the upper

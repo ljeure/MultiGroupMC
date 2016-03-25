@@ -11,7 +11,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "Material.h"
 #include "Surface.h"
 #include "Boundaries.h"
 #include "Tally.h"
@@ -20,6 +19,7 @@
 #include "Neutron.h"
 #include "Monte_carlo.h"
 #include "../../OpenMOC/src/Universe.h"
+#include "../../OpenMOC/src/Material.h"
 
 int main() {
 
@@ -40,65 +40,41 @@ int main() {
     test_boundary.setSurface(Z, MAX, &z_max);
     test_boundary.setSurface(Z, MIN, &z_min);
 
-    const int num_groups = 2;
+    // create OpenMOC materials
+    int num_groups = 2;
+    Material uranium(1, "uranium");
+    uranium.setNumEnergyGroups(2);
+    uranium.setSigmaTByGroup(2.0/9.0, 1);
+    uranium.setSigmaTByGroup(5.0/6.0, 2);
+    uranium.setSigmaFByGroup(1.0/480.0, 1);
+    uranium.setSigmaFByGroup(1.0/16.0, 2);
+    uranium.setNuSigmaFByGroup(2.4/480.0, 1);
+    uranium.setNuSigmaFByGroup(2.4/16.0, 2);
+    uranium.setSigmaSByGroup(71.0/360.0, 1, 1);
+    uranium.setSigmaSByGroup(.02, 1, 2);
+    uranium.setSigmaSByGroup(0.0, 2, 1);
+    uranium.setSigmaSByGroup(11.0/15.0, 2, 2);
+    uranium.setChiByGroup(1.0, 1);
+    uranium.setChiByGroup(0.0, 2);
 
-    // fuel cross sections
-    std::vector <double> fuel_sigma_f (num_groups);
-    fuel_sigma_f[0] = 1.0/480.0;
-    fuel_sigma_f[1] = 1.0/16.0;
-    std::vector <double> fuel_chi(num_groups);
-    fuel_chi[0] = 1.0;
-    fuel_chi[1] = 0.0;
-    std::vector <double> fuel_sigma_t(num_groups);
-    fuel_sigma_t[0] = 2.0/9.0;
-    fuel_sigma_t[1] = 5.0/6.0;
-
-    // create vector fuel sigma_s by first making an array
-    static const double a_fuel_sigma_s [num_groups*num_groups] =
-    { 71.0/360.0,   .02,
-        0.0,        11.0/15.0 };
-    std::vector <std::vector <double> > fuel_sigma_s (num_groups, 
-            (std::vector <double> (num_groups)));
-    for (int g=0; g<num_groups; ++g) {
-        for (int gp=0; gp<num_groups; ++gp) {
-            fuel_sigma_s[g][gp] = a_fuel_sigma_s[g*num_groups+gp];
-        }
-    }
-
-    // water cross sections
-    std::vector <double> water_sigma_f(num_groups);
-    water_sigma_f[0] = 0.0;
-    water_sigma_f[1] = 0.0;
-    std::vector <double> water_chi(num_groups);
-    water_chi[0] = 0.0;
-    water_chi[1] = 0.0;
-    std::vector <double> water_sigma_t(num_groups);
-    water_sigma_t[0] = 2.0/9.0;
-    water_sigma_t[1] = 5.0/3.0;
-
-    // create vector water sigma_s by first making an array
-    static const double a_water_sigma_s [num_groups*num_groups] =
-    { 71.0/360.0,   .025,
-        0.0,        47.0/30.0 };
-    std::vector <std::vector <double> > water_sigma_s (num_groups, 
-            (std::vector <double> (num_groups)));
-    for (int g=0; g<num_groups; ++g) {
-        for (int gp=0; gp<num_groups; ++gp) {
-            water_sigma_s[g][gp] = a_water_sigma_s[g*num_groups+gp];
-        }
-    }
-
-    // nu: the average number of neutrons released per fission event
-    double nu = 2.4;
-    
-    // create materials
-    MCMaterial fuel(1, fuel_sigma_t, fuel_sigma_s, nu, fuel_sigma_f, fuel_chi);
-    MCMaterial water(0, water_sigma_t, water_sigma_s, nu,
-            water_sigma_f, water_chi);
+    Material moderator(0, "moderator");
+    moderator.setNumEnergyGroups(2);
+    moderator.setSigmaTByGroup(2.0/9.0, 1);
+    moderator.setSigmaTByGroup(5.0/3.0, 2);
+    moderator.setSigmaFByGroup(0.0, 1);
+    moderator.setSigmaFByGroup(0.0, 2);
+    moderator.setNuSigmaFByGroup(0.0, 1);
+    moderator.setNuSigmaFByGroup(0.0, 2);
+    moderator.setSigmaSByGroup(71.0/360.0, 1, 1);
+    moderator.setSigmaSByGroup(.025, 1, 2);
+    moderator.setSigmaSByGroup(0.0, 2, 1);
+    moderator.setSigmaSByGroup(47.0/30.0, 2, 2);
+    moderator.setChiByGroup(0.0, 1);
+    moderator.setChiByGroup(0.0, 2);
 
     // create mesh
-    MCMaterial* point_water = &water;
-    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, point_water,
+    Material* point_moderator = &moderator;
+    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, point_moderator,
             num_groups);
 
     // fill mesh with some material
@@ -113,8 +89,8 @@ int main() {
             fuel_limits[i][j] = a_fuel_limits[i*2+j];
         }
     }
-    MCMaterial* point_fuel = &fuel;
-    test_mesh.fillMaterials(point_fuel, fuel_limits);
+    Material* point_uranium = &uranium;
+    test_mesh.fillMaterials(point_uranium, fuel_limits);
 
     // initialize lattice
     Lattice lattice;
@@ -123,8 +99,9 @@ int main() {
     lattice.setWidth(4.0/9.0, 4.0/9.0);
 
     // simulate neutron histories
-    int num_neutrons = 1000000;
+    int num_neutrons = 1000;
     int num_batches = 3;
+    
     generateNeutronHistories(num_neutrons, test_boundary,
             test_mesh, lattice, num_batches, num_groups);
 

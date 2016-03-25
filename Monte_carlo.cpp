@@ -109,10 +109,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         bounds.sampleLocation(&neutron);
     else {
         fission_banks->sampleSite(&neutron);
-  /*      std::cout << "neutron starting position: "
-            << neutron.getPosition(0) << " " << neutron.getPosition(1) << " "
-            << neutron.getPosition(2) << std::endl;
-  */  }
+    }
 
     // get mesh cell
     std::vector <double> neutron_direction;
@@ -121,17 +118,20 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     Point* neutron_starting_point;
     neutron.getPositionVector(neutron_starting_point);
 
-    std::vector <int> cell;
-    cell = mesh.getCell(neutron_starting_point, neutron_direction);
+    std::vector <int> cell (3);
+    cell[0] = lattice.getLatX(neutron_starting_point);
+    cell[1] = lattice.getLatY(neutron_starting_point);
+    cell[2] = lattice.getLatZ(neutron_starting_point);
+    
     neutron.setCell(cell);
 
     // set neutron group
-    MCMaterial* cell_mat;
+    Material* cell_mat;
     int group;
     cell_mat = mesh.getMaterial(cell);
     std::vector <double> chi(num_groups);
     for (int g=0; g<num_groups; ++g) {
-        chi[g] = cell_mat->getChi(g);
+        chi[g] = cell_mat->getChiByGroup(g+1);
     }
     group = neutron.sampleNeutronEnergyGroup(chi);
     neutron.setGroup(group);
@@ -142,37 +142,30 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         cell_mat = mesh.getMaterial(cell);
         group = neutron.getGroup();
         double neutron_distance;
-        neutron_distance = cell_mat->sampleDistance(group, &neutron);
-//        std::cout << "sampled neutron distance " <<
-//            neutron_distance << std::endl;
+
+        //sample a distance to travel in the material
+        neutron_distance = 
+            -log(neutron.arand()) / cell_mat->getSigmaTByGroup(group+1);
+        //neutron_distance = cell_mat->sampleDistance(group, &neutron);
     
         // track neutron until collision or leakage
         while (neutron_distance > BOUNDARY_ERROR) {
             neutron.getPositionVector(neutron_position);
 
             // get cell boundaries
-            std::vector <double> cell_mins;
-            std::vector <double> cell_maxes;
-            cell_mins = mesh.getCellMin(cell);
-            cell_maxes = mesh.getCellMax(cell);
+            std::vector <double> cell_mins (3);
+            std::vector <double> cell_maxes (3);
+            cell_mins[0] = lattice.getMinX() + cell[0] * lattice.getWidthX();
+            cell_mins[1] = lattice.getMinY() + cell[1] * lattice.getWidthY();
+            // temporary measure:
+            cell_mins[2] = -2.0;
+            cell_maxes[0] = lattice.getMinX() + 
+                (cell[0] + 1) * lattice.getWidthX();
+            cell_maxes[1] = lattice.getMinY() + 
+                (cell[1] + 1) * lattice.getWidthY();
+            // temporary measure:
+            cell_maxes[2] = 2.0;
 
-            //debugging
-/*            std::cout << "\nneutron position " 
-                << neutron_position->getX() << " "
-                << neutron_position->getY() << " "
-                << neutron_position->getZ() << "\n";
-            std::cout << "neutron distance " << neutron_distance << std::endl;
-            std::cout << "cell: " << cell[0] << " " << cell[1] << " " << cell[2]
-                << std::endl;
-            std::cout << "cell max "
-                << cell_maxes[0] << " "
-                << cell_maxes[1] << " "
-                << cell_maxes[2] << std::endl;
-            std::cout << "cell min "
-                << cell_mins[0] << " "
-                << cell_mins[1] << " "
-                << cell_mins[2] << std::endl;
-*/
             // calculate distances to cell boundaries
             std::vector <std::vector <double> > distance_to_cell_edge(3);
             for (int axis=0; axis<3; ++axis) {
@@ -182,15 +175,6 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 distance_to_cell_edge[axis][1] =
                     cell_maxes[axis] - neutron.getPosition(axis);
             }
-/*            std::cout << "distance to cell min "
-                << distance_to_cell_edge[0][0] << " "
-                << distance_to_cell_edge[1][0] << " "
-                << distance_to_cell_edge[2][0] << std::endl;
-            std::cout << "distance to cell max "
-                << distance_to_cell_edge[0][1] << " "
-                << distance_to_cell_edge[1][1] << " "
-                << distance_to_cell_edge[2][1] << std::endl;
-*/
             // create lim_bounds
             std::vector <int> cell_lim_bound;
             std::vector <int> box_lim_bound;
@@ -212,7 +196,6 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                     // along the direction vector to the boundary being tested.
                     r = distance_to_cell_edge[axis][side]
                         / neutron.getDirection(axis);
-  //                  std::cout << "r " << r << std::endl;
 
                     if (r > BOUNDARY_ERROR & r < tempd) {
                         tempd = r;
@@ -227,12 +210,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
 
             // move neutron
             neutron.move(tempd);
-/*            std::cout << "neutron moved " << tempd << std::endl;
-            std::cout << "neutron moved to new position: "
-            << neutron_position->getX() << " "
-            << neutron_position->getY() << " "
-            << neutron_position->getZ() << "\n";
-*/
+
             // add distance to cell flux
             mesh.fluxAdd(cell, tempd, group);
 
@@ -251,6 +229,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                     
                     if (neutron.getCell()[axis] == 0 && side ==0)
                         box_lim_bound.push_back(sur_side);
+
+                    // change to lattice when it gets 3D capabilities
                     if (neutron.getCell()[axis] == mesh.getNumCells(axis) - 1
                             && side == 1)
                         box_lim_bound.push_back(sur_side);
@@ -266,7 +246,6 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 if (std::find(box_lim_bound.begin(),
                             box_lim_bound.end(),sur_side)
                         != box_lim_bound.end()) {
-
 
                     // if the neutron is reflected
                     if (bounds.getSurfaceType(axis, side) == 1) {
@@ -289,31 +268,52 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 }
             }
  
-
             // get new neutron cell
             if (neutron_distance > 0) {
                 neutron_direction = neutron.getDirectionVector();
-                cell = mesh.getCell(neutron_position, neutron_direction);
+                cell[0] = lattice.getLatX(neutron_position);
+                cell[1] = lattice.getLatY(neutron_position);
+                cell[2] = lattice.getLatZ(neutron_position);
                 
                 // nudge neutron and find its cell
                 neutron.move(TINY_MOVE);
                 neutron.getPositionVector(neutron_position);
-                if (mesh.positionInBounds(neutron_position)) {
-                    cell = mesh.getCell(neutron_position, neutron_direction);
+
+                // withinBounds seems to return true if the point is without
+                if (not lattice.withinBounds(neutron_position)) {
+                    cell[0] = lattice.getLatX(neutron_position);
+                    cell[1] = lattice.getLatY(neutron_position);
+                    cell[2] = lattice.getLatZ(neutron_position);
                 }
                 neutron.move(-TINY_MOVE);
+  
                 neutron.setCell(cell);
             }
-        
         }
 
         // check interaction
         if (neutron.alive()) {
             cell_mat = mesh.getMaterial(cell);
 
-            // sample what the interaction will be
-            int neutron_interaction;
-            neutron_interaction = cell_mat->sampleInteraction(group, &neutron);
+            // calculate sigma_s for a group in order to sample an interaction
+            std::vector <double> sigma_s_group;
+            double sum_sigma_s_group=0;
+            for (int g=1; g<=cell_mat->getNumEnergyGroups(); ++g) {
+                sigma_s_group.push_back(cell_mat->getSigmaSByGroup(group+1, g));
+                sum_sigma_s_group += cell_mat->getSigmaSByGroup(group+1, g);
+            }
+
+            // calculate sigma_a in order to sample an interaction
+            double sigma_a;
+            sigma_a =
+                cell_mat->getSigmaTByGroup(group+1) - sum_sigma_s_group;
+
+            // sample an interaction
+            int neutron_interaction =
+                (int) (neutron.arand() < (sigma_a
+                            / cell_mat->getSigmaTByGroup(group+1)));
+            
+            //neutron_interaction = cell_mat->sampleInteraction(group, &neutron);
 
 
             // scattering event
@@ -321,14 +321,10 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
 
                 // sample scattered direction
                 neutron.sampleDirection();
-  //              std::cout << "neutron scattered" << std::endl;
 
                 // sample new energy group
-                int new_group;
-                std::vector <double> temp_sigma_s_group;
-                temp_sigma_s_group = cell_mat->getSigmaS(group);
-                new_group = neutron.sampleScatteredGroup(temp_sigma_s_group,
-                        group);
+                int new_group = neutron.sampleScatteredGroup(sigma_s_group,
+                    group);
 
                 // set new group
                 neutron.setGroup(new_group);
@@ -346,18 +342,22 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 cell_mat = mesh.getMaterial(cell);
                 neutron.getPositionVector(neutron_position);
 
-                // fission event
-                if (cell_mat->sampleFission(group, &neutron) == 1) {
+                // sample whether fission event occurs
+                int fission_occurs =
+                    neutron.arand() < cell_mat->getSigmaFByGroup(group+1)
+                    / sigma_a;
 
-                    // sample number of neutrons
-                    for (int i=0; i<cell_mat->sampleNumFission(&neutron); ++i) {
-                       
+                // fission event
+                if (fission_occurs == 1) {
+
+                    // sample number of neutrons released during fission
+                    double nu = cell_mat->getNuSigmaFByGroup(1)
+                        / cell_mat->getSigmaFByGroup(1);
+                    int lower = (int) nu;
+                    int add = (int) (neutron.arand() < nu -lower);
+                    int num_neutrons = lower + add;
+                    for (int i=0; i<num_neutrons; ++i) {
                         fission_banks->add(neutron_position);
-/*                        std::cout << "fission event at "
-                            << neutron_position->getX() << " "
-                            << neutron_position->getY() << " "
-                            << neutron_position->getZ() << std::endl;
-*/
                         tallies[FISSIONS] += 1;
                     }
                 }

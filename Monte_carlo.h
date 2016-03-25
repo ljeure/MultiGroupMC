@@ -16,6 +16,7 @@
 #include <algorithm>
 #include "../../OpenMOC/src/Point.h"
 #include "../../OpenMOC/src/Universe.h"
+#include "../../OpenMOC/src/Material.h"
 
 #include "Tally.h"
 #include "Mesh.h"
