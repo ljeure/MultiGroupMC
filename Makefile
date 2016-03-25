@@ -5,7 +5,6 @@ headers = $(source:.cpp=.h)
 source = Boundaries.cpp
 source += Surface.cpp
 source += main.cpp
-source += Material.cpp
 source += Tally.cpp
 source += Neutron.cpp
 source += Mesh.cpp

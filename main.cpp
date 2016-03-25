@@ -40,25 +40,33 @@ int main() {
     test_boundary.setSurface(Z, MAX, &z_max);
     test_boundary.setSurface(Z, MIN, &z_min);
 
-    // create OpenMOC materials
-    int num_groups = 2;
-    Material uranium(1, "uranium");
-    uranium.setNumEnergyGroups(2);
-    uranium.setSigmaTByGroup(2.0/9.0, 1);
-    uranium.setSigmaTByGroup(5.0/6.0, 2);
-    uranium.setSigmaFByGroup(1.0/480.0, 1);
-    uranium.setSigmaFByGroup(1.0/16.0, 2);
-    uranium.setNuSigmaFByGroup(2.4/480.0, 1);
-    uranium.setNuSigmaFByGroup(2.4/16.0, 2);
-    uranium.setSigmaSByGroup(71.0/360.0, 1, 1);
-    uranium.setSigmaSByGroup(.02, 1, 2);
-    uranium.setSigmaSByGroup(0.0, 2, 1);
-    uranium.setSigmaSByGroup(11.0/15.0, 2, 2);
-    uranium.setChiByGroup(1.0, 1);
-    uranium.setChiByGroup(0.0, 2);
+    // create array with z_coordinate max and mins for 2D OpenMOC
+    std::vector <double> z_bounds (2);
+    z_bounds[0] = test_boundary.getSurfaceCoord(2, 0);
+    z_bounds[1] = test_boundary.getSurfaceCoord(2, 1);
 
+    // number of energy groups
+    int num_groups = 2;
+    
+    // create fuel
+    Material fuel(1, "fuel");
+    fuel.setNumEnergyGroups(num_groups);
+    fuel.setSigmaTByGroup(2.0/9.0, 1);
+    fuel.setSigmaTByGroup(5.0/6.0, 2);
+    fuel.setSigmaFByGroup(1.0/480.0, 1);
+    fuel.setSigmaFByGroup(1.0/16.0, 2);
+    fuel.setNuSigmaFByGroup(2.4/480.0, 1);
+    fuel.setNuSigmaFByGroup(2.4/16.0, 2);
+    fuel.setSigmaSByGroup(71.0/360.0, 1, 1);
+    fuel.setSigmaSByGroup(.02, 1, 2);
+    fuel.setSigmaSByGroup(0.0, 2, 1);
+    fuel.setSigmaSByGroup(11.0/15.0, 2, 2);
+    fuel.setChiByGroup(1.0, 1);
+    fuel.setChiByGroup(0.0, 2);
+
+    // create moderator
     Material moderator(0, "moderator");
-    moderator.setNumEnergyGroups(2);
+    moderator.setNumEnergyGroups(num_groups);
     moderator.setSigmaTByGroup(2.0/9.0, 1);
     moderator.setSigmaTByGroup(5.0/3.0, 2);
     moderator.setSigmaFByGroup(0.0, 1);
@@ -89,8 +97,8 @@ int main() {
             fuel_limits[i][j] = a_fuel_limits[i*2+j];
         }
     }
-    Material* point_uranium = &uranium;
-    test_mesh.fillMaterials(point_uranium, fuel_limits);
+    Material* point_fuel = &fuel;
+    test_mesh.fillMaterials(point_fuel, fuel_limits);
 
     // initialize lattice
     Lattice lattice;
@@ -99,11 +107,11 @@ int main() {
     lattice.setWidth(4.0/9.0, 4.0/9.0);
 
     // simulate neutron histories
-    int num_neutrons = 1000;
+    int num_neutrons = 990;
     int num_batches = 3;
     
     generateNeutronHistories(num_neutrons, test_boundary,
-            test_mesh, lattice, num_batches, num_groups);
+            test_mesh, lattice, num_batches, num_groups, z_bounds);
 
     // plot neutron flux
     std::vector <std::vector <std::vector <std::vector <double> > > > flux =

@@ -9,9 +9,6 @@
 
 /*
  @brief     constructor for Neutron class
- @param     position a vector containing the starting position of the neutron
- @param     theta the polar angle of the neutron's initial direction
- @param     phi the azimuthal angle of the neutron's initial direction
  @param     neutron_num to be saved as the neutron's id number
 */
 Neutron::Neutron(int neutron_num) {
@@ -125,12 +122,12 @@ double Neutron::getPosition(int axis) {
         pos = _xyz.getY();
     if (axis==2)
         pos = _xyz.getZ();
+    return pos;
 }
 
 /*
  @brief     gets the position vector of the neutron
  @param     a Point* to be pointed at a Point containing the neutron's position
- @return    the Point* pointing at a Point containing the neutron's position
 */
 void Neutron::getPositionVector(Point* &position) {
     position = &_xyz;

@@ -21,6 +21,7 @@ Boundaries::~Boundaries() {}
  @brief     set the surfaces into the geometry
  @paraam    axis 0, 1, or 2 corresponding to x y and z
  @param     side 0 or 1 corresponding to the minimum or maximum of the geometry
+ @param     surface an MCSurface* to be saved as the surface of the geometry
 */
 void Boundaries::setSurface(Axes axis, min_max side, MCSurface* surface) {
     _surfaces[2*axis + side] = surface;
