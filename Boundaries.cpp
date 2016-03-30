@@ -21,9 +21,9 @@ Boundaries::~Boundaries() {}
  @brief     set the surfaces into the geometry
  @paraam    axis 0, 1, or 2 corresponding to x y and z
  @param     side 0 or 1 corresponding to the minimum or maximum of the geometry
- @param     surface an MCSurface* to be saved as the surface of the geometry
+ @param     surface a Surface* to be saved as the surface of the geometry
 */
-void Boundaries::setSurface(Axes axis, min_max side, MCSurface* surface) {
+void Boundaries::setSurface(Axes axis, min_max side, Surface* surface) {
     _surfaces[2*axis + side] = surface;
 }
 
@@ -34,7 +34,12 @@ void Boundaries::setSurface(Axes axis, min_max side, MCSurface* surface) {
  @return    the position of the surface within the geometry
 */
 float Boundaries::getSurfaceCoord(int axis, int side) {
-    return _surfaces[axis*2+side]->getPosition();
+    if (axis == 0)
+        return _surfaces[axis*2+side]->getX();
+    if (axis == 1)
+        return _surfaces[axis*2+side]->getY();
+    if (axis == 2)
+        return _surfaces[axis*2+side]->getZ();
 }
 
 /*
@@ -43,8 +48,8 @@ float Boundaries::getSurfaceCoord(int axis, int side) {
  @param     side 0 or 1 corresponding to the minimum or maximum of the geometry
  @return    the type of the surface, 0 = vacuum 1 = reflective
 */
-BoundaryType Boundaries::getSurfaceType(int axis, int side) {
-    return _surfaces[axis*2+side]->getType();
+boundaryType Boundaries::getSurfaceType(int axis, int side) {
+    return _surfaces[axis*2+side]->getBoundaryType();
 }
 
 /*

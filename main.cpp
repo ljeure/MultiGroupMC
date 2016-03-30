@@ -20,6 +20,7 @@
 #include "Monte_carlo.h"
 #include "../../OpenMOC/src/Universe.h"
 #include "../../OpenMOC/src/Material.h"
+//#include "../../OpenMOC/src/Surface.cpp"
 
 int main() {
 
@@ -31,14 +32,28 @@ int main() {
     MCSurface z_max(MCREFLECTIVE, 2.0);
     MCSurface z_min(MCREFLECTIVE, -2.0);
 
+    // create openmoc surfaces and set their boundary types
+    XPlane left(-2.0, 0, "left");
+    XPlane right(2.1, 1, "right");
+    YPlane in(-2.0, 2, "in");
+    YPlane out(2.0, 3, "out");
+    ZPlane bottom(-2.0, 4, "bottom");
+    ZPlane top(2.0, 5, "top");
+    left.setBoundaryType(VACUUM);
+    right.setBoundaryType(VACUUM);
+    in.setBoundaryType(VACUUM);
+    out.setBoundaryType(VACUUM);
+    top.setBoundaryType(REFLECTIVE);
+    bottom.setBoundaryType(REFLECTIVE);
+
     // create geometry with surfaces
     Boundaries test_boundary;
-    test_boundary.setSurface(X, MAX, &x_max);
-    test_boundary.setSurface(X, MIN, &x_min);
-    test_boundary.setSurface(Y, MAX, &y_max);
-    test_boundary.setSurface(Y, MIN, &y_min);
-    test_boundary.setSurface(Z, MAX, &z_max);
-    test_boundary.setSurface(Z, MIN, &z_min);
+    test_boundary.setSurface(X, MAX, &right);
+    test_boundary.setSurface(X, MIN, &left);
+    test_boundary.setSurface(Y, MAX, &out);
+    test_boundary.setSurface(Y, MIN, &in);
+    test_boundary.setSurface(Z, MAX, &top);
+    test_boundary.setSurface(Z, MIN, &bottom);
 
     // create array with z_coordinate max and mins for 2D OpenMOC
     std::vector <double> z_bounds (2);

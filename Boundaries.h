@@ -8,11 +8,10 @@
 #ifndef BOUNDARIES_H
 #define BOUNDARIES_H
 
-//#include "precision.h"
-
 #include "Surface.h"
 #include "Neutron.h"
 #include "../../OpenMOC/src/Point.h"
+#include "../../OpenMOC/src/Surface.h"
 
 #include <vector>
 #include <iostream>
@@ -24,14 +23,14 @@ public:
     virtual ~Boundaries();
 
     float getSurfaceCoord(int axis, int side);
-    BoundaryType getSurfaceType(int axis, int side);
-    void setSurface(Axes axis, min_max side, MCSurface* surface);
+    boundaryType getSurfaceType(int axis, int side);
+    void setSurface(Axes axis, min_max side, Surface* surface);
     void sampleLocation(Neutron* neutron);
 
 private:
 
     /** container for Surface objects */
-    MCSurface* _surfaces[6];
+    Surface* _surfaces[6];
 };
 
 #endif
