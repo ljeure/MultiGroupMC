@@ -251,3 +251,22 @@ bool Mesh::positionInBounds(Point* position) {
 int Mesh::getNumCells(int axis) {
     return _axis_sizes[axis];
 }
+
+
+
+/*
+   searching among files grep -r "getFSRId" OpenMOC
+
+   in montecarlo
+    initlialize fsrs function
+    loop that creates points in each region
+    findFSRId(point) for each point. This adds the FSR to the geometry
+   
+
+
+   index cells by fsr_id
+   cell.getFSRId(cell)
+
+   each surface splits into half spaces
+    
+   */

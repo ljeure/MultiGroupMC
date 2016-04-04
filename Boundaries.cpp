@@ -34,12 +34,10 @@ void Boundaries::setSurface(Axes axis, min_max side, Surface* surface) {
  @return    the position of the surface within the geometry
 */
 float Boundaries::getSurfaceCoord(int axis, int side) {
-    if (axis == 0)
-        return _surfaces[axis*2+side]->getX();
-    if (axis == 1)
-        return _surfaces[axis*2+side]->getY();
-    if (axis == 2)
-        return _surfaces[axis*2+side]->getZ();
+    
+    // segmetize routine
+    // this might be unnecessary if i use findNextCell
+    return 0;    
 }
 
 /*
