@@ -5,6 +5,7 @@
  @date      January 9 2016
 */
 
+int _num_locks;
 #include <iostream>
 #include <vector>
 #include <time.h>
@@ -22,7 +23,8 @@
 #include "../../OpenMOC/src/Material.h"
 #include "../../OpenMOC/src/Cell.h"
 #include "../../OpenMOC/src/Universe.h"
-//#include "../../OpenMOC/src/Surface.cpp"
+#include "../../OpenMOC/src/Geometry.h"
+
 
 int main() {
 
@@ -104,45 +106,41 @@ int main() {
     Cell* fuel_cell_point = &fuel_cell;
 
     // create universes
-    Universe root_universe(0, "root universe");
-    root_universe.addCell(root_cell_point);
-    Universe moderator_universe(1, "moderator universe");
-    moderator_universe.addCell(moderator_cell_point);
-    Universe fuel_universe(2, "fuel universe");
-    fuel_universe.addCell(fuel_cell_point);
+    Universe* root_universe = new Universe(0, "root universe");
+    root_universe->addCell(root_cell_point);
+    Universe* moderator_universe = new Universe(1, "moderator universe");
+    moderator_universe->addCell(moderator_cell_point);
+    Universe* fuel_universe = new Universe(2, "fuel universe");
+    fuel_universe->addCell(fuel_cell_point);
 
     // create lattice
+    int numXLat = 9;
+    int numYLat = 9;
+    int numZLat = 1;
     Lattice lattice;
-    lattice.setNumX(9);
-    lattice.setNumY(9);
     lattice.setWidth(4.0/9.0, 4.0/9.0);
     
     // create universe array for input into lattice
-    int row = 9;
-    int col = 9;
-    Universe** universe_array;
-    universe_array = new Universe* [row];
-    for (int i=0; i<row; ++i)
-        universe_array[i] = new Universe [col];
-    for (int i=0; i<row; ++i) {
-        for (int j=0; j<col; ++j) {
-            universe_array[i][j] = moderator_universe;
+    Universe* universe_array [numXLat*numYLat];
+    for (int i=0; i<numXLat; ++i) {
+        for (int j=0; j<numYLat; ++j) {
+            universe_array[j*numXLat+i] = moderator_universe;
         }
     }
     for (int i=3; i<6; ++i) {
         for (int j=3; j<6; ++j) {
-            universe_array[i][j] = fuel_universe;
+            universe_array[j*numXLat+i] = fuel_universe;
         }
     }
-
-//    std::cout << "number cells in universe " << universe_array[8][8].getNumCells()
-//        << std::endl;
+    Universe** universe_array_pointer;
+    universe_array_pointer = universe_array;
 
     // set universes in lattice
-    lattice.setUniverses(1, 9, 9, universe_array);
+    lattice.setUniverses(numZLat, numYLat, numXLat, universe_array_pointer);
 
-
-
+    // create geometry
+    Geometry* geometry = new Geometry();
+    geometry->setRootUniverse(root_universe);
 
 /*
     // create geometry with surfaces

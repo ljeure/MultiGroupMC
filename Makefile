@@ -18,9 +18,13 @@ source += ../../OpenMOC/src/LocalCoords.cpp
 source += ../../OpenMOC/src/Cell.cpp
 source += ../../OpenMOC/src/log.cpp
 source += ../../OpenMOC/src/Material.cpp
-#source += ../../OpenMOC/src/linalg.cpp
-#source += ../../OpenMOC/src/Vector.cpp
-#source += ../../OpenMOC/src/Matrix.cpp
+source += ../../OpenMOC/src/Geometry.cpp
+source += ../../OpenMOC/src/linalg.cpp
+source += ../../OpenMOC/src/Vector.cpp
+source += ../../OpenMOC/src/Matrix.cpp
+source += ../../OpenMOC/src/Cmfd.cpp
+source += ../../OpenMOC/src/Track.cpp
+source += ../../OpenMOC/src/PolarQuad.cpp
 
 obj = $(source:.cpp=.o)
 
@@ -29,6 +33,7 @@ CC = g++
 CFLAGS := -DFP_PRECISION=double
 CFLAGS += -DVEC_LENGTH=8
 CFLAGS += -fopenmp
+CFLAGS += -std=c++11
 
 $(program): $(obj) $(headers)
 	$(CC) $(CFLAGS) $(obj) -o $@ -lm
