@@ -34,6 +34,7 @@ CFLAGS := -DFP_PRECISION=double
 CFLAGS += -DVEC_LENGTH=8
 CFLAGS += -fopenmp
 CFLAGS += -std=c++11
+CFLAGS += -DOPENMP
 
 $(program): $(obj) $(headers)
 	$(CC) $(CFLAGS) $(obj) -o $@ -lm

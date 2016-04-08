@@ -147,6 +147,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         //sample a distance to travel in the material
         neutron_distance = 
             -log(neutron.arand()) / cell_mat->getSigmaTByGroup(group+1);
+    std::cout << "transport neutron\n";
     
         // track neutron until collision or leakage
         while (neutron_distance > BOUNDARY_ERROR) {

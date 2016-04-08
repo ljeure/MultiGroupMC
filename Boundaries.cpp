@@ -37,7 +37,10 @@ float Boundaries::getSurfaceCoord(int axis, int side) {
     
     // segmetize routine
     // this might be unnecessary if i use findNextCell
-    return 0;    
+    if (side==MIN)
+        return -2.0;
+    if (side==MAX)
+        return 2.0;
 }
 
 /*

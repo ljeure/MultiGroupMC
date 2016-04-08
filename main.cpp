@@ -5,7 +5,7 @@
  @date      January 9 2016
 */
 
-int _num_locks;
+
 #include <iostream>
 #include <vector>
 #include <time.h>
@@ -142,15 +142,26 @@ int main() {
     Geometry* geometry = new Geometry();
     geometry->setRootUniverse(root_universe);
 
-/*
+    
+    // test getNextCell
+//    LocalCoords* test_point = new LocalCoords(.1, .1, .1);
+ //   Cell* test_cell = new Cell();
+    //test_cell = geometry->findNextCell(test_point);
+
+
+
+
+
+
+//-------------------------------------------------------------------------
     // create geometry with surfaces
     Boundaries test_boundary;
-    test_boundary.setSurface(X, MAX, &right);
-    test_boundary.setSurface(X, MIN, &left);
-    test_boundary.setSurface(Y, MAX, &out);
-    test_boundary.setSurface(Y, MIN, &in);
-    test_boundary.setSurface(Z, MAX, &top);
-    test_boundary.setSurface(Z, MIN, &bottom);
+    test_boundary.setSurface(X, MAX, &x_max);
+    test_boundary.setSurface(X, MIN, &x_min);
+    test_boundary.setSurface(Y, MAX, &y_max);
+    test_boundary.setSurface(Y, MIN, &y_min);
+    test_boundary.setSurface(Z, MAX, &z_max);
+    test_boundary.setSurface(Z, MIN, &z_min);
 
     // create array with z_coordinate max and mins for 2D OpenMOC
     std::vector <double> z_bounds (2);
@@ -183,9 +194,11 @@ int main() {
     int num_neutrons = 990;
     int num_batches = 3;
     
+
     generateNeutronHistories(num_neutrons, test_boundary,
             test_mesh, lattice, num_batches, num_groups, z_bounds);
 
+    /*
     // plot neutron flux
     std::vector <std::vector <std::vector <std::vector <double> > > > flux =
        test_mesh.getFlux();
@@ -194,6 +207,7 @@ int main() {
     // run python script to get flux plots
     system("python Flux_parser.py");
 */
+
     std::cout << std::endl;
     return 0;
 

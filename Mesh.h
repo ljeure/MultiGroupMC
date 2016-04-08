@@ -8,8 +8,6 @@
 #ifndef MESH_H
 #define MESH_H
 
-//#include "precision.h"
-
 #include <iostream>
 #include <vector>
 #include <math.h>
