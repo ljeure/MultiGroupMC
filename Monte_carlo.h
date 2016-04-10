@@ -17,6 +17,8 @@
 #include "../../OpenMOC/src/Point.h"
 #include "../../OpenMOC/src/Universe.h"
 #include "../../OpenMOC/src/Material.h"
+#include "../../OpenMOC/src/Geometry.h"
+#include "../../OpenMOC/src/LocalCoords.h"
 
 #include "Tally.h"
 #include "Mesh.h"
@@ -28,7 +30,7 @@ enum fission_bank_names {OLD, NEW};
 
 void generateNeutronHistories(int n_histories, Boundaries bounds,
         Mesh &mesh, Lattice &lattice, int num_batches, int num_groups,
-        std::vector <double> &z_bounds);
+        Geometry* geometry, std::vector <double> &z_bounds);
 
 void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         bool first_round, Mesh &mesh, Lattice &lattice, Fission* fission_banks,

@@ -21,7 +21,45 @@
 */
 void generateNeutronHistories(int n_histories, Boundaries bounds,
         Mesh &mesh, Lattice &lattice, int num_batches, int num_groups,
-        std::vector <double> &z_bounds) {
+        Geometry* geometry, std::vector <double> &z_bounds) {
+
+    // initialize fsid
+    geometry->initializeFSRs();
+    
+    // test fsrid
+    LocalCoords* test = new LocalCoords(.1,.1,.1);
+    Universe* fuel_uni = geometry->getAllUniverses()[1];
+    test->setUniverse(fuel_uni);
+    std::cout << "got here\n";
+    Cell* fuel_cell = fuel_uni->getCell(1);
+    test->setCell(fuel_cell);
+    std::cout << "fsr test " << geometry->findFSRId(test) << std::endl;
+
+    // add FSR points to geometry
+    Point sampleFSR;
+    for (int i=0; i<lattice.getNumX(); ++i) {
+        double xPos = lattice.getMinX() + lattice.getWidthX()*(i + 1/2);
+        sampleFSR.setX(xPos);
+        
+        for (int j=0; j<lattice.getNumX(); ++j) {
+            double yPos = lattice.getMinY() + lattice.getWidthY()*(j + 1/2);
+            sampleFSR.setY(yPos);
+        
+            for (int k=0; k<lattice.getNumZ(); ++k) {
+                double zPos = lattice.getMinZ() + lattice.getWidthZ()*(k + 1/2);
+                sampleFSR.setZ(zPos);
+                std::cout << "k " << k << std::endl;
+                LocalCoords* coordFSR = new LocalCoords(
+                        sampleFSR.getX(), sampleFSR.getY(), sampleFSR.getX());
+                
+                std::cout << "fsrid " << i << " " << j << " " << k
+                    << ": " << /*geometry->findFSRId(coordFSR) <<*/ std::endl;
+
+            }
+        }
+    }
+
+
 
     // create arrays for tallies and fissions
     std::vector <Tally> tallies(5);
@@ -120,6 +158,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     neutron.getPositionVector(neutron_starting_point);
 
     std::vector <int> cell (3);
+//    std::cout << "starting point x " << neutron_starting_point->getX() << std::endl;
     cell[0] = lattice.getLatX(neutron_starting_point);
     cell[1] = lattice.getLatY(neutron_starting_point);
     cell[2] = lattice.getLatZ(neutron_starting_point);
@@ -147,7 +186,6 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         //sample a distance to travel in the material
         neutron_distance = 
             -log(neutron.arand()) / cell_mat->getSigmaTByGroup(group+1);
-    std::cout << "transport neutron\n";
     
         // track neutron until collision or leakage
         while (neutron_distance > BOUNDARY_ERROR) {
@@ -208,8 +246,12 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 }
             }
 
+     //       std::cout << "position before moving " << neutron.getPosition(0)
+      //          << std::endl;
             // move neutron
             neutron.move(tempd);
+ //           std::cout << "position after moving " << neutron.getPosition(0)
+   //             << std::endl;
 
             // add distance to cell flux
             mesh.fluxAdd(cell, tempd, group);
@@ -269,23 +311,32 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
  
             // get new neutron cell
             if (neutron_distance > 0) {
-                cell[0] = lattice.getLatX(neutron_position);
+  /*              std::cout << "neutron position " << neutron_position->getX()
+                    << std::endl;
+    */
+                    cell[0] = lattice.getLatX(neutron_position);
                 cell[1] = lattice.getLatY(neutron_position);
                 cell[2] = lattice.getLatZ(neutron_position);
                 
                 // nudge neutron and find its cell
-                neutron.move(TINY_MOVE);
+                neutron.move(1e-3);
                 neutron.getPositionVector(neutron_position);
-
+                /*std::cout << "neutron position after nudge "
+                    << neutron_position->getX() << std::endl;
+*/
                 // withinBounds seems to return true if the point is without
-                if (not lattice.withinBounds(neutron_position)) {
+                if (lattice.withinBounds(neutron_position)) {
                     cell[0] = lattice.getLatX(neutron_position);
                     cell[1] = lattice.getLatY(neutron_position);
                     cell[2] = lattice.getLatZ(neutron_position);
                 }
-                neutron.move(-TINY_MOVE);
+                neutron.move(-1e-3);
   
-                neutron.setCell(cell);
+                /*std::cout << "neutron cell currently "
+                    << neutron.getCell()[0] <<std::endl;
+                */
+                    neutron.setCell(cell);
+                //std::cout << "neutron cell set to " << cell[0] <<std::endl;
             }
         }
 

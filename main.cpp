@@ -42,6 +42,7 @@ int main() {
     z_min.setBoundaryType(REFLECTIVE);
     z_max.setBoundaryType(REFLECTIVE);
 
+       
     // create surface pointers
     Surface* x_min_point = &x_min;
     Surface* x_max_point = &x_max;
@@ -101,7 +102,7 @@ int main() {
     moderator_cell.setFill(moderator_point);
     Cell* moderator_cell_point = &moderator_cell;
     
-    Cell fuel_cell(1, "fuel");
+    Cell fuel_cell(2, "fuel");
     fuel_cell.setFill(fuel_point);
     Cell* fuel_cell_point = &fuel_cell;
 
@@ -168,8 +169,6 @@ int main() {
     z_bounds[0] = test_boundary.getSurfaceCoord(2, 0);
     z_bounds[1] = test_boundary.getSurfaceCoord(2, 1);
 
-    
-
     // create mesh
     Material* point_moderator = &moderator;
     Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, point_moderator,
@@ -190,15 +189,52 @@ int main() {
     Material* point_fuel = &fuel;
     test_mesh.fillMaterials(point_fuel, fuel_limits);
 
+    // test fsrid
+    std::cout << "testing fsrid\n";
+    LocalCoords* test = new LocalCoords(.1,.1,.1);
+    test->setUniverse(fuel_universe);
+    test->setCell(fuel_cell_point);
+    std::cout << "fsr test " << geometry->findFSRId(test) << std::endl;
+
+    // add FSR points to geometry
+    Point sampleFSR;
+    for (int i=0; i<lattice.getNumX(); ++i) {
+        double xPos = lattice.getMinX() + lattice.getWidthX()*(i + 1/2);
+        sampleFSR.setX(xPos);
+        
+        for (int j=0; j<lattice.getNumX(); ++j) {
+            double yPos = lattice.getMinY() + lattice.getWidthY()*(j + 1/2);
+            sampleFSR.setY(yPos);
+        
+            for (int k=0; k<lattice.getNumZ(); ++k) {
+                double zPos = lattice.getMinZ() + lattice.getWidthZ()*(k + 1/2);
+                sampleFSR.setZ(zPos);
+                LocalCoords* rootCoordFSR = new LocalCoords(
+                        sampleFSR.getX(), sampleFSR.getY(), sampleFSR.getX());
+                Universe* cellUniverse = lattice.getUniverse(i, j, k);
+                Cell* cellForFSR = root_universe->findCell(
+                        rootCoordFSR);
+                std::cout << "got hereeee\n";
+                LocalCoords* localCoordFSR = new LocalCoords(0, 0, 0);
+                localCoordFSR->setUniverse(cellUniverse);
+                localCoordFSR->setCell(cellForFSR);
+                
+                std::cout << "fsrid " << i << " " << j << " " << k
+                    << ": " << geometry->findFSRId(localCoordFSR) << std::endl;
+
+            }
+        }
+    }
+
+
+    /*
     // simulate neutron histories
     int num_neutrons = 990;
     int num_batches = 3;
     
-
     generateNeutronHistories(num_neutrons, test_boundary,
-            test_mesh, lattice, num_batches, num_groups, z_bounds);
-
-    /*
+            test_mesh, lattice, num_batches, num_groups, geometry, z_bounds);
+    
     // plot neutron flux
     std::vector <std::vector <std::vector <std::vector <double> > > > flux =
        test_mesh.getFlux();
