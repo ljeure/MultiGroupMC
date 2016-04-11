@@ -29,90 +29,76 @@
 int main() {
 
     // create openmoc surfaces and set their boundary types
-    XPlane x_min(-2.0, 0, "x_min");
-    XPlane x_max(2.1, 1, "x_max");
-    YPlane y_min(-2.0, 2, "y_min");
-    YPlane y_max(2.0, 3, "y_max");
-    ZPlane z_min(-2.0, 4, "z_min");
-    ZPlane z_max(2.0, 5, "z_max");
-    x_min.setBoundaryType(VACUUM);
-    x_max.setBoundaryType(VACUUM);
-    y_min.setBoundaryType(VACUUM);
-    y_max.setBoundaryType(VACUUM);
-    z_min.setBoundaryType(REFLECTIVE);
-    z_max.setBoundaryType(REFLECTIVE);
-
-       
-    // create surface pointers
-    Surface* x_min_point = &x_min;
-    Surface* x_max_point = &x_max;
-    Surface* y_min_point = &y_min;
-    Surface* y_max_point = &y_max;
-    Surface* z_min_point = &z_min;
-    Surface* z_max_point = &z_max;
+    XPlane* x_min = new XPlane(-2.0, 0, "x_min");
+    XPlane* x_max = new XPlane(2.1, 1, "x_max");
+    YPlane* y_min = new YPlane(-2.0, 2, "y_min");
+    YPlane* y_max = new YPlane(2.0, 3, "y_max");
+    ZPlane* z_min = new ZPlane(-2.0, 4, "z_min");
+    ZPlane* z_max = new ZPlane(2.0, 5, "z_max");
+    x_min->setBoundaryType(VACUUM);
+    x_max->setBoundaryType(VACUUM);
+    y_min->setBoundaryType(VACUUM);
+    y_max->setBoundaryType(VACUUM);
+    z_min->setBoundaryType(REFLECTIVE);
+    z_max->setBoundaryType(REFLECTIVE);
 
     // number of energy groups
     int num_groups = 2;
     
     // create fuel
-    Material fuel(1, "fuel");
-    fuel.setNumEnergyGroups(num_groups);
-    fuel.setSigmaTByGroup(2.0/9.0, 1);
-    fuel.setSigmaTByGroup(5.0/6.0, 2);
-    fuel.setSigmaFByGroup(1.0/480.0, 1);
-    fuel.setSigmaFByGroup(1.0/16.0, 2);
-    fuel.setNuSigmaFByGroup(2.4/480.0, 1);
-    fuel.setNuSigmaFByGroup(2.4/16.0, 2);
-    fuel.setSigmaSByGroup(71.0/360.0, 1, 1);
-    fuel.setSigmaSByGroup(.02, 1, 2);
-    fuel.setSigmaSByGroup(0.0, 2, 1);
-    fuel.setSigmaSByGroup(11.0/15.0, 2, 2);
-    fuel.setChiByGroup(1.0, 1);
-    fuel.setChiByGroup(0.0, 2);
-    Material* fuel_point = &fuel;
+    Material* fuel = new Material(1, "fuel");
+    fuel->setNumEnergyGroups(num_groups);
+    fuel->setSigmaTByGroup(2.0/9.0, 1);
+    fuel->setSigmaTByGroup(5.0/6.0, 2);
+    fuel->setSigmaFByGroup(1.0/480.0, 1);
+    fuel->setSigmaFByGroup(1.0/16.0, 2);
+    fuel->setNuSigmaFByGroup(2.4/480.0, 1);
+    fuel->setNuSigmaFByGroup(2.4/16.0, 2);
+    fuel->setSigmaSByGroup(71.0/360.0, 1, 1);
+    fuel->setSigmaSByGroup(.02, 1, 2);
+    fuel->setSigmaSByGroup(0.0, 2, 1);
+    fuel->setSigmaSByGroup(11.0/15.0, 2, 2);
+    fuel->setChiByGroup(1.0, 1);
+    fuel->setChiByGroup(0.0, 2);
 
     // create moderator
-    Material moderator(0, "moderator");
-    moderator.setNumEnergyGroups(num_groups);
-    moderator.setSigmaTByGroup(2.0/9.0, 1);
-    moderator.setSigmaTByGroup(5.0/3.0, 2);
-    moderator.setSigmaFByGroup(0.0, 1);
-    moderator.setSigmaFByGroup(0.0, 2);
-    moderator.setNuSigmaFByGroup(0.0, 1);
-    moderator.setNuSigmaFByGroup(0.0, 2);
-    moderator.setSigmaSByGroup(71.0/360.0, 1, 1);
-    moderator.setSigmaSByGroup(.025, 1, 2);
-    moderator.setSigmaSByGroup(0.0, 2, 1);
-    moderator.setSigmaSByGroup(47.0/30.0, 2, 2);
-    moderator.setChiByGroup(0.0, 1);
-    moderator.setChiByGroup(0.0, 2);
-    Material* moderator_point = &moderator;
+    Material* moderator = new Material(0, "moderator");
+    moderator->setNumEnergyGroups(num_groups);
+    moderator->setSigmaTByGroup(2.0/9.0, 1);
+    moderator->setSigmaTByGroup(5.0/3.0, 2);
+    moderator->setSigmaFByGroup(0.0, 1);
+    moderator->setSigmaFByGroup(0.0, 2);
+    moderator->setNuSigmaFByGroup(0.0, 1);
+    moderator->setNuSigmaFByGroup(0.0, 2);
+    moderator->setSigmaSByGroup(71.0/360.0, 1, 1);
+    moderator->setSigmaSByGroup(.025, 1, 2);
+    moderator->setSigmaSByGroup(0.0, 2, 1);
+    moderator->setSigmaSByGroup(47.0/30.0, 2, 2);
+    moderator->setChiByGroup(0.0, 1);
+    moderator->setChiByGroup(0.0, 2);
 
     // create cells
-    Cell root_cell(0, "root");
-    root_cell.addSurface(1, x_min_point);
-    root_cell.addSurface(-1, x_max_point);
-    root_cell.addSurface(1, y_min_point);
-    root_cell.addSurface(-1, y_max_point);
-    root_cell.addSurface(1, z_min_point);
-    root_cell.addSurface(-1, z_max_point);
-    Cell* root_cell_point = &root_cell;
+    Cell* root_cell = new Cell(0, "root");
+    root_cell->addSurface(1, x_min);
+    root_cell->addSurface(-1, x_max);
+    root_cell->addSurface(1, y_min);
+    root_cell->addSurface(-1, y_max);
+    root_cell->addSurface(1, z_min);
+    root_cell->addSurface(-1, z_max);
     
-    Cell moderator_cell(1, "moderator");
-    moderator_cell.setFill(moderator_point);
-    Cell* moderator_cell_point = &moderator_cell;
+    Cell* moderator_cell = new Cell(1, "moderator");
+    moderator_cell->setFill(moderator);
     
-    Cell fuel_cell(2, "fuel");
-    fuel_cell.setFill(fuel_point);
-    Cell* fuel_cell_point = &fuel_cell;
+    Cell* fuel_cell = new Cell(2, "fuel");
+    fuel_cell->setFill(fuel);
 
     // create universes
     Universe* root_universe = new Universe(0, "root universe");
-    root_universe->addCell(root_cell_point);
+    root_universe->addCell(root_cell);
     Universe* moderator_universe = new Universe(1, "moderator universe");
-    moderator_universe->addCell(moderator_cell_point);
+    moderator_universe->addCell(moderator_cell);
     Universe* fuel_universe = new Universe(2, "fuel universe");
-    fuel_universe->addCell(fuel_cell_point);
+    fuel_universe->addCell(fuel_cell);
 
     // create lattice
     int numXLat = 9;
@@ -143,26 +129,15 @@ int main() {
     Geometry* geometry = new Geometry();
     geometry->setRootUniverse(root_universe);
 
-    
-    // test getNextCell
-//    LocalCoords* test_point = new LocalCoords(.1, .1, .1);
- //   Cell* test_cell = new Cell();
-    //test_cell = geometry->findNextCell(test_point);
-
-
-
-
-
-
 //-------------------------------------------------------------------------
     // create geometry with surfaces
     Boundaries test_boundary;
-    test_boundary.setSurface(X, MAX, &x_max);
-    test_boundary.setSurface(X, MIN, &x_min);
-    test_boundary.setSurface(Y, MAX, &y_max);
-    test_boundary.setSurface(Y, MIN, &y_min);
-    test_boundary.setSurface(Z, MAX, &z_max);
-    test_boundary.setSurface(Z, MIN, &z_min);
+    test_boundary.setSurface(X, MAX, x_max);
+    test_boundary.setSurface(X, MIN, x_min);
+    test_boundary.setSurface(Y, MAX, y_max);
+    test_boundary.setSurface(Y, MIN, y_min);
+    test_boundary.setSurface(Z, MAX, z_max);
+    test_boundary.setSurface(Z, MIN, z_min);
 
     // create array with z_coordinate max and mins for 2D OpenMOC
     std::vector <double> z_bounds (2);
@@ -170,8 +145,7 @@ int main() {
     z_bounds[1] = test_boundary.getSurfaceCoord(2, 1);
 
     // create mesh
-    Material* point_moderator = &moderator;
-    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, point_moderator,
+    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, moderator,
             num_groups);
 
     // fill mesh with some material
@@ -186,35 +160,29 @@ int main() {
             fuel_limits[i][j] = a_fuel_limits[i*2+j];
         }
     }
-    Material* point_fuel = &fuel;
-    test_mesh.fillMaterials(point_fuel, fuel_limits);
+    test_mesh.fillMaterials(fuel, fuel_limits);
 
     // test fsrid
     std::cout << "testing fsrid\n";
     LocalCoords* test = new LocalCoords(.1,.1,.1);
-    test->setUniverse(fuel_universe);
-    test->setCell(fuel_cell_point);
+    test->setUniverse(root_universe);
+    //test->setCell(root_cell);
+    std::cout << "testing fsrid\n";
     std::cout << "fsr test " << geometry->findFSRId(test) << std::endl;
 
     // add FSR points to geometry
-    Point sampleFSR;
     for (int i=0; i<lattice.getNumX(); ++i) {
         double xPos = lattice.getMinX() + lattice.getWidthX()*(i + 1/2);
-        sampleFSR.setX(xPos);
         
         for (int j=0; j<lattice.getNumX(); ++j) {
             double yPos = lattice.getMinY() + lattice.getWidthY()*(j + 1/2);
-            sampleFSR.setY(yPos);
         
             for (int k=0; k<lattice.getNumZ(); ++k) {
                 double zPos = lattice.getMinZ() + lattice.getWidthZ()*(k + 1/2);
-                sampleFSR.setZ(zPos);
-                LocalCoords* rootCoordFSR = new LocalCoords(
-                        sampleFSR.getX(), sampleFSR.getY(), sampleFSR.getX());
+                LocalCoords* rootCoordFSR = new LocalCoords(xPos, yPos, zPos);
                 Universe* cellUniverse = lattice.getUniverse(i, j, k);
                 Cell* cellForFSR = root_universe->findCell(
                         rootCoordFSR);
-                std::cout << "got hereeee\n";
                 LocalCoords* localCoordFSR = new LocalCoords(0, 0, 0);
                 localCoordFSR->setUniverse(cellUniverse);
                 localCoordFSR->setCell(cellForFSR);
