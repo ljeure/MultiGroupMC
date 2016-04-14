@@ -61,7 +61,7 @@ int main() {
     fuel->setChiByGroup(0.0, 2);
 
     // create moderator
-    Material* moderator = new Material(0, "moderator");
+    Material* moderator = new Material(2, "moderator");
     moderator->setNumEnergyGroups(num_groups);
     moderator->setSigmaTByGroup(2.0/9.0, 1);
     moderator->setSigmaTByGroup(5.0/3.0, 2);
@@ -155,12 +155,13 @@ int main() {
         }
     }
 
-    LocalCoords* test = new LocalCoords(0,0,0);
+    /*
+       LocalCoords* test = new LocalCoords(0,0,0);
     test->setUniverse(root_universe);
     geometry->findFirstCell(test);
 
     std::cout << "fsrid " << geometry->findFSRId(test) << std::endl;
-    
+    */
 
 //----------------------------------------------------------------------------//
     
@@ -194,7 +195,7 @@ int main() {
 
     // simulate neutron histories
     int num_neutrons = 10000;
-    int num_batches = 8;
+    int num_batches = 3;
     
     generateNeutronHistories(num_neutrons, test_boundary, test_mesh, lattice,
             num_batches, num_groups, geometry, z_bounds, root_universe);

@@ -66,7 +66,7 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
         double sumStandardDev = tallies[LEAKS].getStandardDeviation(n_histories)
             + tallies[FISSIONS].getStandardDeviation(n_histories)
             + tallies[ABSORPTIONS].getStandardDeviation(n_histories);
-        std::cout << "For batch " << batch << ", k = " << k
+        std::cout << "\nFor batch " << batch << ", k = " << k
             << " with standard deviation of " << sumStandardDev << std::endl;
         double fissions;
         fissions = tallies[FISSIONS].getCount();
@@ -143,17 +143,20 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     Material* cell_mat;
     Cell* cell_obj;
     int group;
-/*
+
     LocalCoords* neutron_coord_position = new LocalCoords(
             neutron_starting_point->getX(), neutron_starting_point->getY(),
             neutron_starting_point->getZ());
     neutron_coord_position->setUniverse(root_universe);
-    geometry->findFirstCell(neutron_coord_position);
+    //geometry->findFirstCell(neutron_coord_position);
     cell_obj = geometry->findCellContainingCoords(neutron_coord_position);
     cell_mat = cell_obj->getFillMaterial();
-  */
-    cell_mat = mesh.getMaterial(cell);  
-
+  
+ //   cell_mat = mesh.getMaterial(cell);  
+/*    std::cout << "cell " << cell[0] << " " << cell[1] << " " << cell[2]
+        << std::endl;
+    std::cout << "material " << cell_mat->getId() << "\n\n";
+*/
     std::vector <double> chi(num_groups);
     for (int g=0; g<num_groups; ++g) {
         chi[g] = cell_mat->getChiByGroup(g+1);
@@ -164,7 +167,14 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     // follow neutron while it's alive
     while (neutron.alive()) {
 
-        cell_mat = mesh.getMaterial(cell);
+        neutron_coord_position->setX(neutron_position->getX());
+        neutron_coord_position->setY(neutron_position->getY());
+        neutron_coord_position->setZ(neutron_position->getZ());
+        neutron_coord_position->setUniverse(root_universe);
+        cell_obj = geometry->findCellContainingCoords(neutron_coord_position);
+        cell_mat = cell_obj->getFillMaterial();
+        
+        //cell_mat = mesh.getMaterial(cell);
         group = neutron.getGroup();
         double neutron_distance;
 
@@ -231,12 +241,12 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 }
             }
 
-     //       std::cout << "position before moving " << neutron.getPosition(0)
-      //          << std::endl;
+            //std::cout << "position before moving " << neutron.getPosition(0)
+             //   << std::endl;
             // move neutron
             neutron.move(tempd);
- //           std::cout << "position after moving " << neutron.getPosition(0)
-   //             << std::endl;
+            //std::cout << "position after moving " << neutron.getPosition(0)
+            //    << std::endl;
 
             // add distance to cell flux
             mesh.fluxAdd(cell, tempd, group);
@@ -258,9 +268,23 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                         box_lim_bound.push_back(sur_side);
 
                     // change to lattice when it gets 3D capabilities
-                    if (neutron.getCell()[axis] == mesh.getNumCells(axis) - 1
-                            && side == 1)
-                        box_lim_bound.push_back(sur_side);
+                    //if (neutron.getCell()[axis] == mesh.getNumCells(axis) - 1
+                    if (axis == 0) {
+                        if (neutron.getCell()[axis] == lattice->getNumX() - 1
+                                && side == 1)
+                            box_lim_bound.push_back(sur_side);
+                    }
+                    if (axis == 1) {
+                        if (neutron.getCell()[axis] == lattice->getNumY() - 1
+                                && side == 1)
+                            box_lim_bound.push_back(sur_side);
+                    }
+                    if (axis == 2) {
+                        if (neutron.getCell()[axis] == lattice->getNumZ() - 1
+                                && side == 1)
+                            box_lim_bound.push_back(sur_side);
+                    }
+
                 }
             }
 
@@ -327,7 +351,12 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
 
         // check interaction
         if (neutron.alive()) {
-            cell_mat = mesh.getMaterial(cell);
+            neutron_coord_position->setX(neutron_position->getX());
+            neutron_coord_position->setY(neutron_position->getY());
+            neutron_coord_position->setZ(neutron_position->getZ());
+            neutron_coord_position->setUniverse(root_universe);
+            cell_obj = geometry->findCellContainingCoords(neutron_coord_position);
+            cell_mat = cell_obj->getFillMaterial();
 
             // calculate sigma_s for a group in order to sample an interaction
             std::vector <double> sigma_s_group;
@@ -370,7 +399,12 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 // sample for fission event
                 group = neutron.getGroup();
                 cell = neutron.getCell();
-                cell_mat = mesh.getMaterial(cell);
+                neutron_coord_position->setX(neutron_position->getX());
+                neutron_coord_position->setY(neutron_position->getY());
+                neutron_coord_position->setZ(neutron_position->getZ());
+                neutron_coord_position->setUniverse(root_universe);
+                cell_obj = geometry->findCellContainingCoords(neutron_coord_position);
+                cell_mat = cell_obj->getFillMaterial();
                 neutron.getPositionVector(neutron_position);
 
                 // sample whether fission event occurs
@@ -378,6 +412,10 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                     neutron.arand() < cell_mat->getSigmaFByGroup(group+1)
                     / sigma_a;
 
+                /*std::cout << "in " << cell[0] << " "
+                        << cell[1] << " " << cell[2] 
+                        << ", material = " << cell_mat->getId() << std::endl;
+                */
                 // fission event
                 if (fission_occurs == 1) {
 
