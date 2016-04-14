@@ -1,5 +1,6 @@
 program = monte_carlo
 
+DEBUG = yes
 
 headers = $(source:.cpp=.h)
 source = Boundaries.cpp
@@ -35,6 +36,9 @@ CFLAGS += -DVEC_LENGTH=8
 CFLAGS += -fopenmp
 CFLAGS += -std=c++11
 CFLAGS += -DOPENMP
+ifeq ($(DEBUG),yes)
+	CFLAGS += -g
+endif
 
 $(program): $(obj) $(headers)
 	$(CC) $(CFLAGS) $(obj) -o $@ -lm

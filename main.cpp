@@ -5,7 +5,6 @@
  @date      January 9 2016
 */
 
-
 #include <iostream>
 #include <vector>
 #include <time.h>
@@ -30,7 +29,7 @@ int main() {
 
     // create openmoc surfaces and set their boundary types
     XPlane* x_min = new XPlane(-2.0, 0, "x_min");
-    XPlane* x_max = new XPlane(2.1, 1, "x_max");
+    XPlane* x_max = new XPlane(2.0, 1, "x_max");
     YPlane* y_min = new YPlane(-2.0, 2, "y_min");
     YPlane* y_max = new YPlane(2.0, 3, "y_max");
     ZPlane* z_min = new ZPlane(-2.0, 4, "z_min");
@@ -95,8 +94,10 @@ int main() {
     // create universes
     Universe* root_universe = new Universe(0, "root universe");
     root_universe->addCell(root_cell);
+
     Universe* moderator_universe = new Universe(1, "moderator universe");
     moderator_universe->addCell(moderator_cell);
+    
     Universe* fuel_universe = new Universe(2, "fuel universe");
     fuel_universe->addCell(fuel_cell);
 
@@ -104,8 +105,8 @@ int main() {
     int numXLat = 9;
     int numYLat = 9;
     int numZLat = 1;
-    Lattice lattice;
-    lattice.setWidth(4.0/9.0, 4.0/9.0);
+    Lattice* lattice = new Lattice();
+    lattice->setWidth(4.0/9.0, 4.0/9.0, 4.0);
     
     // create universe array for input into lattice
     Universe* universe_array [numXLat*numYLat];
@@ -123,13 +124,46 @@ int main() {
     universe_array_pointer = universe_array;
 
     // set universes in lattice
-    lattice.setUniverses(numZLat, numYLat, numXLat, universe_array_pointer);
+    lattice->setUniverses(numZLat, numYLat, numXLat, universe_array_pointer);
+
+    // fill root cell with lattice
+    root_cell->setFill(lattice);
 
     // create geometry
     Geometry* geometry = new Geometry();
     geometry->setRootUniverse(root_universe);
 
-//-------------------------------------------------------------------------
+    // add FSR points to geometry
+    for (int i=0; i<lattice->getNumX(); ++i) {
+        double xPos = lattice->getMinX() + lattice->getWidthX()*(i + .5);
+        
+        for (int j=0; j<lattice->getNumX(); ++j) {
+            double yPos = lattice->getMinY() + lattice->getWidthY()*(j + .5);
+        
+            for (int k=0; k<lattice->getNumZ(); ++k) {
+                double zPos = lattice->getMinZ()
+                    + lattice->getWidthZ()*(k + .5);
+                LocalCoords* localCoordFSR = new LocalCoords(xPos, yPos, zPos);
+                localCoordFSR->setUniverse(root_universe);
+                geometry->findFirstCell(localCoordFSR);
+                
+                int fsr = geometry->findFSRId(localCoordFSR);
+                geometry->initializeFSRVectors();
+
+                delete localCoordFSR;
+            }
+        }
+    }
+
+    LocalCoords* test = new LocalCoords(0,0,0);
+    test->setUniverse(root_universe);
+    geometry->findFirstCell(test);
+
+    std::cout << "fsrid " << geometry->findFSRId(test) << std::endl;
+    
+
+//----------------------------------------------------------------------------//
+    
     // create geometry with surfaces
     Boundaries test_boundary;
     test_boundary.setSurface(X, MAX, x_max);
@@ -145,8 +179,7 @@ int main() {
     z_bounds[1] = test_boundary.getSurfaceCoord(2, 1);
 
     // create mesh
-    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, moderator,
-            num_groups);
+    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, moderator, num_groups);
 
     // fill mesh with some material
     static const double a_fuel_limits [6] =
@@ -155,53 +188,16 @@ int main() {
       -2.0,         2.0 };
     std::vector <std::vector <double> > fuel_limits (3,
             (std::vector <double> (2)));
-    for (int i=0; i<3; ++i) {
-        for (int j=0; j<2; ++j) {
-            fuel_limits[i][j] = a_fuel_limits[i*2+j];
-        }
-    }
     test_mesh.fillMaterials(fuel, fuel_limits);
 
-    // test fsrid
-    std::cout << "testing fsrid\n";
-    LocalCoords* test = new LocalCoords(.1,.1,.1);
-    test->setUniverse(root_universe);
-    //test->setCell(root_cell);
-    std::cout << "testing fsrid\n";
-    std::cout << "fsr test " << geometry->findFSRId(test) << std::endl;
+//----------------------------------------------------------------------------//
 
-    // add FSR points to geometry
-    for (int i=0; i<lattice.getNumX(); ++i) {
-        double xPos = lattice.getMinX() + lattice.getWidthX()*(i + 1/2);
-        
-        for (int j=0; j<lattice.getNumX(); ++j) {
-            double yPos = lattice.getMinY() + lattice.getWidthY()*(j + 1/2);
-        
-            for (int k=0; k<lattice.getNumZ(); ++k) {
-                double zPos = lattice.getMinZ() + lattice.getWidthZ()*(k + 1/2);
-                LocalCoords* rootCoordFSR = new LocalCoords(xPos, yPos, zPos);
-                Universe* cellUniverse = lattice.getUniverse(i, j, k);
-                Cell* cellForFSR = root_universe->findCell(
-                        rootCoordFSR);
-                LocalCoords* localCoordFSR = new LocalCoords(0, 0, 0);
-                localCoordFSR->setUniverse(cellUniverse);
-                localCoordFSR->setCell(cellForFSR);
-                
-                std::cout << "fsrid " << i << " " << j << " " << k
-                    << ": " << geometry->findFSRId(localCoordFSR) << std::endl;
-
-            }
-        }
-    }
-
-
-    /*
     // simulate neutron histories
-    int num_neutrons = 990;
-    int num_batches = 3;
+    int num_neutrons = 10000;
+    int num_batches = 8;
     
-    generateNeutronHistories(num_neutrons, test_boundary,
-            test_mesh, lattice, num_batches, num_groups, geometry, z_bounds);
+    generateNeutronHistories(num_neutrons, test_boundary, test_mesh, lattice,
+            num_batches, num_groups, geometry, z_bounds, root_universe);
     
     // plot neutron flux
     std::vector <std::vector <std::vector <std::vector <double> > > > flux =
@@ -210,9 +206,7 @@ int main() {
 
     // run python script to get flux plots
     system("python Flux_parser.py");
-*/
 
     std::cout << std::endl;
     return 0;
-
     }
