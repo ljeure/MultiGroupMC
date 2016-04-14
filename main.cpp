@@ -182,15 +182,6 @@ int main() {
     // create mesh
     Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, moderator, num_groups);
 
-    // fill mesh with some material
-    static const double a_fuel_limits [6] =
-    { -2.0/3.0,     2.0/3.0,
-      -2.0/3.0,     2.0/3.0,
-      -2.0,         2.0 };
-    std::vector <std::vector <double> > fuel_limits (3,
-            (std::vector <double> (2)));
-    test_mesh.fillMaterials(fuel, fuel_limits);
-
 //----------------------------------------------------------------------------//
 
     // simulate neutron histories
