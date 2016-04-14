@@ -23,8 +23,10 @@ Boundaries::~Boundaries() {}
  @param     side 0 or 1 corresponding to the minimum or maximum of the geometry
  @param     surface a Surface* to be saved as the surface of the geometry
 */
-void Boundaries::setSurface(Axes axis, min_max side, Surface* surface) {
-    _surfaces[2*axis + side] = surface;
+void Boundaries::setSurface(Axes axis, min_max side, double coord,
+        boundaryType type) {
+    _surface_coords[2*axis + side] = coord;
+    _surface_types[2*axis + side] = type;
 }
 
 /*
@@ -34,13 +36,7 @@ void Boundaries::setSurface(Axes axis, min_max side, Surface* surface) {
  @return    the position of the surface within the geometry
 */
 float Boundaries::getSurfaceCoord(int axis, int side) {
-    
-    // segmetize routine
-    // this might be unnecessary if i use findNextCell
-    if (side==MIN)
-        return -2.0;
-    if (side==MAX)
-        return 2.0;
+    return _surface_coords[2*axis+side];
 }
 
 /*
@@ -50,7 +46,7 @@ float Boundaries::getSurfaceCoord(int axis, int side) {
  @return    the type of the surface, 0 = vacuum 1 = reflective
 */
 boundaryType Boundaries::getSurfaceType(int axis, int side) {
-    return _surfaces[axis*2+side]->getBoundaryType();
+    return _surface_types[2*axis+side];
 }
 
 /*

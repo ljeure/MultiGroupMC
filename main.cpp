@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "Surface.h"
+//#include "Surface.h"
 #include "Boundaries.h"
 #include "Tally.h"
 #include "Mesh.h"
@@ -133,6 +133,8 @@ int main() {
     Geometry* geometry = new Geometry();
     geometry->setRootUniverse(root_universe);
 
+
+    /**
     // add FSR points to geometry
     for (int i=0; i<lattice->getNumX(); ++i) {
         double xPos = lattice->getMinX() + lattice->getWidthX()*(i + .5);
@@ -154,42 +156,38 @@ int main() {
             }
         }
     }
-
-    /*
-       LocalCoords* test = new LocalCoords(0,0,0);
-    test->setUniverse(root_universe);
-    geometry->findFirstCell(test);
-
-    std::cout << "fsrid " << geometry->findFSRId(test) << std::endl;
     */
 
 //----------------------------------------------------------------------------//
     
     // create geometry with surfaces
+    // z boundaries are automatically reflective because OpenMOC doesn't
+    // support 3D
     Boundaries test_boundary;
-    test_boundary.setSurface(X, MAX, x_max);
-    test_boundary.setSurface(X, MIN, x_min);
-    test_boundary.setSurface(Y, MAX, y_max);
-    test_boundary.setSurface(Y, MIN, y_min);
-    test_boundary.setSurface(Z, MAX, z_max);
-    test_boundary.setSurface(Z, MIN, z_min);
-
-    // create array with z_coordinate max and mins for 2D OpenMOC
-    std::vector <double> z_bounds (2);
-    z_bounds[0] = test_boundary.getSurfaceCoord(2, 0);
-    z_bounds[1] = test_boundary.getSurfaceCoord(2, 1);
+    test_boundary.setSurface(X, MAX, root_cell->getMaxX(),
+            root_cell->getMaxXBoundaryType());
+    test_boundary.setSurface(X, MIN, root_cell->getMinX(),
+            root_cell->getMinXBoundaryType());
+    test_boundary.setSurface(Y, MAX, root_cell->getMaxY(),
+            root_cell->getMaxYBoundaryType());
+    test_boundary.setSurface(Y, MIN, root_cell->getMinY(),
+            root_cell->getMinYBoundaryType());
+    test_boundary.setSurface(Z, MAX, root_cell->getMaxZ(), REFLECTIVE);
+    test_boundary.setSurface(Z, MIN, root_cell->getMinZ(), REFLECTIVE);
 
     // create mesh
-    Mesh test_mesh(test_boundary, 4.0/9.0, 4.0/9.0, 4.0, moderator, num_groups);
+    Mesh test_mesh(test_boundary, lattice->getNumX(), lattice->getNumY(),
+            lattice->getNumZ(), fuel->getNumEnergyGroups());
 
 //----------------------------------------------------------------------------//
 
+    
     // simulate neutron histories
     int num_neutrons = 10000;
     int num_batches = 3;
     
     generateNeutronHistories(num_neutrons, test_boundary, test_mesh, lattice,
-            num_batches, num_groups, geometry, z_bounds, root_universe);
+            num_batches, num_groups, geometry, root_universe);
     
     // plot neutron flux
     std::vector <std::vector <std::vector <std::vector <double> > > > flux =
@@ -201,4 +199,4 @@ int main() {
 
     std::cout << std::endl;
     return 0;
-    }
+}

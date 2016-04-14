@@ -8,11 +8,10 @@
 #ifndef FISSION_H
 #define FISSION_H
 
-//#include "precision.h"
-
 #include <vector>
 #include <iostream>
 
+#include "Enumerations.h"
 #include "Neutron.h"
 #include "../../OpenMOC/src/Point.h"
 

@@ -8,16 +8,15 @@
 #ifndef MESH_H
 #define MESH_H
 
-//#include <iostream>
 #include <vector>
-//#include <math.h>
 
+#include "Enumerations.h"
 #include "Boundaries.h"
 
 class Mesh {
 public:
-    Mesh(Boundaries bounds, double delta_x, double delta_y, double delta_z,
-            Material* default_material, int num_groups);
+    Mesh(Boundaries bounds, int size_x, int size_y, int size_z,
+            int num_groups);
     virtual ~Mesh();
 
     void fluxAdd(std::vector <int> &cell, double distance, int group);
@@ -25,12 +24,6 @@ public:
     std::vector <std::vector <std::vector <std::vector <double> > > > getFlux();
 
 private:
-
-    /** the width of the cell along each axis */
-    std::vector <double> _delta_axes;
-
-    /** the minimum locations on the geometry in each direction */
-    std::vector <double> _boundary_mins;
 
     /** the number of cells along each axis */
     std::vector <int> _axis_sizes;

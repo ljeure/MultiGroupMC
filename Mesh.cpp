@@ -10,29 +10,17 @@
 /*
  @brief     constructor for Mesh class
 */
-Mesh::Mesh(Boundaries bounds, double delta_x, double delta_y, double delta_z,
-        Material* default_material, int num_groups) {
-
-    // save deltas 
-    _delta_axes.push_back(delta_x);
-    _delta_axes.push_back(delta_y);
-    _delta_axes.push_back(delta_z);
+Mesh::Mesh(Boundaries bounds, int size_x, int size_y, int size_z,
+        int num_groups) {
+    
+    // save axis sizes
+    _axis_sizes.push_back(size_x);
+    _axis_sizes.push_back(size_y);
+    _axis_sizes.push_back(size_z);
 
     // save number of groups
     _num_groups = num_groups;
 
-    // save boundary mins
-    for (int axis=0; axis<3; ++axis) {
-        _boundary_mins.push_back(bounds.getSurfaceCoord(axis, 0));
-    }
-
-    // save axis sizes
-    for (int axis=0; axis<3; ++axis) {
-        int size = (bounds.getSurfaceCoord(axis, MAX) - _boundary_mins[axis])
-            / _delta_axes[axis];
-        _axis_sizes.push_back(size);
-    }
-    
     // resize _flux and set all its elements = 0
     _flux.resize(_num_groups);
     for (int g=0; g<_num_groups; ++g) {
@@ -53,7 +41,6 @@ Mesh::Mesh(Boundaries bounds, double delta_x, double delta_y, double delta_z,
  @brief     deconstructor for Mesh class
 */
 Mesh::~Mesh() {}
-
 
 /*
  @brief     add the distance a neutron has traveled within the cell to the flux
@@ -91,15 +78,6 @@ std::vector <std::vector <std::vector <std::vector <double> > > >
 }
 
 /*
-   searching among files grep -r "getFSRId" OpenMOC
-
-   in montecarlo
-    initlialize fsrs function
-    loop that creates points in each region
-    findFSRId(point) for each point. This adds the FSR to the geometry
-   
-
-
    index cells by fsr_id
    cell.getFSRId(cell)
 

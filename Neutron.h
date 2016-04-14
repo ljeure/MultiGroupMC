@@ -8,8 +8,6 @@
 #ifndef NEUTRON_H
 #define NEUTRON_H
 
-//#include "precision.h"
-
 #include <vector>
 #include <cmath>
 #include <stdio.h>
@@ -17,7 +15,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#include "Surface.h"
+#include "Enumerations.h"
 #include "../../OpenMOC/src/Point.h"
 
 class Neutron {

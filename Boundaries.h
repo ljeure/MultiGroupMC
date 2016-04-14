@@ -8,7 +8,7 @@
 #ifndef BOUNDARIES_H
 #define BOUNDARIES_H
 
-#include "Surface.h"
+#include "Enumerations.h"
 #include "Neutron.h"
 #include "../../OpenMOC/src/Point.h"
 #include "../../OpenMOC/src/Surface.h"
@@ -24,13 +24,16 @@ public:
 
     float getSurfaceCoord(int axis, int side);
     boundaryType getSurfaceType(int axis, int side);
-    void setSurface(Axes axis, min_max side, Surface* surface);
+    void setSurface(Axes axis, min_max side, double coord, boundaryType type);
     void sampleLocation(Neutron* neutron);
 
 private:
 
-    /** container for Surface objects */
-    Surface* _surfaces[6];
+    /** the coordinate of each geometry boundary along its axis*/
+    double _surface_coords[6];
+
+    /** the surface type of each geometry boundary */
+    boundaryType _surface_types[6];
 };
 
 #endif

@@ -4,7 +4,7 @@ DEBUG = yes
 
 headers = $(source:.cpp=.h)
 source = Boundaries.cpp
-source += Surface.cpp
+#source += Surface.cpp
 source += main.cpp
 source += Tally.cpp
 source += Neutron.cpp
@@ -12,6 +12,7 @@ source += Mesh.cpp
 source += Monte_carlo.cpp
 source += Plotter.cpp
 source += Fission.cpp
+source += Enumerations.cpp
 source += ../../OpenMOC/src/Point.cpp
 source += ../../OpenMOC/src/Universe.cpp
 source += ../../OpenMOC/src/Surface.cpp
