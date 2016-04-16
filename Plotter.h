@@ -12,7 +12,6 @@
 #include <vector>
 
 // function declarations
-void printFluxToFile(std::vector <std::vector <std::vector
-        <std::vector <double> > > > &_flux);
+void printFluxToFile(std::vector <double> &flux_fsr);
 
 #endif
