@@ -26,14 +26,6 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
     // initialize fsid
     geometry->initializeFSRs();
     
-   /* 
-    // test fsrid
-    LocalCoords* test = new LocalCoords(.1,.1,.1);
-    Universe* fuel_uni = geometry->getAllUniverses()[1];
-    test->setUniverse(fuel_uni);
-    Cell* fuel_cell = fuel_uni->getCell(1);
-    test->setCell(fuel_cell);
-*/
     // create arrays for tallies and fissions
     std::vector <Tally> tallies(5);
     Fission fission_banks;
@@ -116,6 +108,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     const double BOUNDARY_ERROR = 1e-10;
     
     Point* neutron_position = new Point();
+    //Point* neutron_position;
     
     // new way to sample neutron and set its direction
     Neutron neutron(neutron_num);

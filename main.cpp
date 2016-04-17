@@ -23,7 +23,6 @@
 #include "../../OpenMOC/src/Universe.h"
 #include "../../OpenMOC/src/Geometry.h"
 
-
 int main() {
 
     // create openmoc surfaces and set their boundary types
@@ -177,7 +176,7 @@ int main() {
 //----------------------------------------------------------------------------//
     
     // simulate neutron histories
-    int num_neutrons = 10000;
+    int num_neutrons = 1000;
     int num_batches = 3;
     
     generateNeutronHistories(num_neutrons, test_boundary, test_flux, lattice,
@@ -191,5 +190,25 @@ int main() {
     system("python Flux_parser.py");
 
     std::cout << std::endl;
+
+    delete geometry;
+    delete x_min;
+    delete x_max;
+    delete y_min;
+    delete y_max;
+    delete z_min;
+    delete z_max;
+/*  
+    get seg faults when I try to delete these
+    delete lattice;
+    delete fuel_cell;
+    delete moderator_cell;
+    delete fuel_universe;
+    delete moderator_universe;
+    delete root_universe;
+    delete moderator;
+    delete fuel;
+*/
+
     return 0;
 }
