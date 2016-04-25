@@ -237,7 +237,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             neutron_coord_position->setY((cell_mins[1] + cell_maxes[1])/2.);
             neutron_coord_position->setZ((cell_mins[2] + cell_maxes[2])/2.);
             neutron_coord_position->setUniverse(root_universe);
-            geometry->findFirstCell(neutron_coord_position);
+            geometry->findNextCell(neutron_coord_position);
             int fsr = geometry->findFSRId(neutron_coord_position);
             flux.add(neutron.getGroup(), fsr, tempd);
 
@@ -423,3 +423,24 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     tallies[CROWS] += crow_distance;
     tallies[NUM_CROWS] += 1;
 }
+
+/*
+   local coords set phi should be the azimuthal angle
+
+    basically use what's in geometry.segmetize
+    copy and paste from Use a local coorsd fro the statrt and end
+    to create a new track segment
+
+    create neutron
+    curr = find first cell
+    while distance < total distance left to travel and neutron alive
+        while curr != null
+        LocaCoords end;
+        find next cell
+
+        check boundaries
+            reflect/kill
+
+    look at cpusolver.h and .cpp when making plot.
+    Monte carlo solver will be subclass of solver
+*/
