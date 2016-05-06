@@ -8,6 +8,7 @@
 #ifndef MONTE_CARLO_H
 #define MONTE_CARLO_H
 
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include <time.h>

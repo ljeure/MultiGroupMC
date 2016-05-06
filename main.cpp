@@ -30,14 +30,14 @@ int main() {
     XPlane* x_max = new XPlane(2.0, 1, "x_max");
     YPlane* y_min = new YPlane(-2.0, 2, "y_min");
     YPlane* y_max = new YPlane(2.0, 3, "y_max");
-    ZPlane* z_min = new ZPlane(-2.0, 4, "z_min");
-    ZPlane* z_max = new ZPlane(2.0, 5, "z_max");
+//    ZPlane* z_min = new ZPlane(-2.0, 4, "z_min");
+//    ZPlane* z_max = new ZPlane(2.0, 5, "z_max");
     x_min->setBoundaryType(VACUUM);
     x_max->setBoundaryType(VACUUM);
     y_min->setBoundaryType(VACUUM);
     y_max->setBoundaryType(VACUUM);
-    z_min->setBoundaryType(REFLECTIVE);
-    z_max->setBoundaryType(REFLECTIVE);
+//    z_min->setBoundaryType(REFLECTIVE);
+//    z_max->setBoundaryType(REFLECTIVE);
 
     // number of energy groups
     int num_groups = 2;
@@ -80,8 +80,8 @@ int main() {
     root_cell->addSurface(-1, x_max);
     root_cell->addSurface(1, y_min);
     root_cell->addSurface(-1, y_max);
-    root_cell->addSurface(1, z_min);
-    root_cell->addSurface(-1, z_max);
+//    root_cell->addSurface(1, z_min);
+//    root_cell->addSurface(-1, z_max);
     
     Cell* moderator_cell = new Cell(1, "moderator");
     moderator_cell->setFill(moderator);
@@ -104,7 +104,7 @@ int main() {
     int numYLat = 9;
     int numZLat = 1;
     Lattice* lattice = new Lattice();
-    lattice->setWidth(4.0/9.0, 4.0/9.0, 4.0);
+    lattice->setWidth(4.0/9.0, 4.0/9.0);
     
     // create universe array for input into lattice
     Universe* universe_array [numXLat*numYLat];
@@ -167,8 +167,8 @@ int main() {
             root_cell->getMaxYBoundaryType());
     test_boundary.setSurface(Y, MIN, root_cell->getMinY(),
             root_cell->getMinYBoundaryType());
-    test_boundary.setSurface(Z, MAX, root_cell->getMaxZ(), REFLECTIVE);
-    test_boundary.setSurface(Z, MIN, root_cell->getMinZ(), REFLECTIVE);
+//    test_boundary.setSurface(Z, MAX, root_cell->getMaxZ(), REFLECTIVE);
+//    test_boundary.setSurface(Z, MIN, root_cell->getMinZ(), REFLECTIVE);
 
     // create flux
     Flux test_flux(geometry->getNumFSRs(), fuel->getNumEnergyGroups());
@@ -196,8 +196,8 @@ int main() {
     delete x_max;
     delete y_min;
     delete y_max;
-    delete z_min;
-    delete z_max;
+//    delete z_min;
+//    delete z_max;
 /*  
     get seg faults when I try to delete these
     delete lattice;

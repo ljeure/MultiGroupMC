@@ -108,7 +108,6 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     const double BOUNDARY_ERROR = 1e-10;
     
     Point* neutron_position = new Point();
-    //Point* neutron_position;
     
     // new way to sample neutron and set its direction
     Neutron neutron(neutron_num);
@@ -128,7 +127,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     std::vector <int> cell (3);
     cell[0] = lattice->getLatX(neutron_starting_point);
     cell[1] = lattice->getLatY(neutron_starting_point);
-    cell[2] = lattice->getLatZ(neutron_starting_point);
+    //cell[2] = lattice->getLatZ(neutron_starting_point);
+    //std::cout << "got lattice cell\n";
     
     neutron.setCell(cell);
 
@@ -155,20 +155,189 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     // follow neutron while it's alive
     while (neutron.alive()) {
 
-        neutron_coord_position->setX(neutron_position->getX());
-        neutron_coord_position->setY(neutron_position->getY());
-        neutron_coord_position->setZ(neutron_position->getZ());
-        neutron_coord_position->setUniverse(root_universe);
-        cell_obj = geometry->findCellContainingCoords(neutron_coord_position);
-        cell_mat = cell_obj->getFillMaterial();
-        
-        group = neutron.getGroup();
-        double neutron_distance;
+// stuff from segmetize --------------------------------------------------------
 
+        // use a LocalCoords for the start and end of each segment
+        double neutron_distance;
+            
         //sample a distance to travel in the material
         neutron_distance = 
             -log(neutron.arand()) / cell_mat->getSigmaTByGroup(group+1);
     
+        // track neutron until collision or escape
+        while (neutron_distance > 0.000001) {
+
+            double x0 = neutron_position->getX();
+            double y0 = neutron_position->getY();
+            double z0 = neutron_position->getZ();
+            double phi =
+                atan(neutron.getDirection(1)/neutron.getDirection(0));
+            FP_PRECISION length;
+            Material* material;
+            int fsr_id;
+
+            LocalCoords start(x0, y0, z0);
+            LocalCoords end(x0, y0, z0);
+            start.setUniverse(root_universe);
+            end.setUniverse(root_universe);
+            start.setPhi(phi);
+            end.setPhi(phi);
+    
+            // find the Cell containing the Track starting Point 
+            Cell* curr = geometry->findFirstCell(&end);
+            Cell* prev;
+
+            // if starting Point was outside the bounds of the Geometry /
+            if (curr == NULL)
+                log_printf(ERROR,
+                        "Could not find a material-filled Cell containing"
+                        " the start Point of this Track: %s");
+
+            // While the end of the segment's LocalCoords is still
+            // within the Geometry move it to the next Cell, create
+            // a new segment, and add it to the Geometry
+            while (curr != NULL) {
+
+                end.copyCoords(&start);
+                end.setPhi(phi);
+
+                // Find the next Cell along the Track's trajectory
+                prev = curr;
+                curr = geometry->findNextCell(&end);
+
+                // Checks that segment does not have the same
+                // start and end Points 
+                if (start.getX() == end.getX()
+                        && start.getY() == end.getY())
+                    log_printf(ERROR,
+                            "Created segment with same start and end point:"
+                            " x = %f, y = %f",start.getX(), start.getY());
+
+                // Find the segment length, Material and
+                // FSR ID of the last cell
+                length =
+                    FP_PRECISION(end.getPoint()->distanceToPoint(
+                                start.getPoint()));
+                //std::cout << "length " << length << std::endl;
+                fsr_id = geometry->findFSRId(&start);
+    
+                            std::cout << "end " << end.getX() << " "
+                                << end.getY() << " "
+                                << end.getZ() << std::endl;
+                            std::cout << "start " << start.getX() << " "
+                                << start.getY() << " "
+                                << start.getZ() << std::endl;
+                // if neutron's path doesn't end in this cell
+                if (length < neutron_distance) {
+
+                    // add distance travelled to flux, shorten distance and
+                    // move neutron
+                    flux.add(neutron.getGroup(), fsr_id, length);
+                    neutron_distance -= length;
+                    neutron.setPosition(0, end.getX());
+                    neutron.setPosition(1, end.getY());
+                    neutron.setPosition(2, end.getZ());
+                }
+
+                // if the neutron's path ends in this cell
+                else {
+                    flux.add(neutron.getGroup(), fsr_id, length);
+                    neutron.move(neutron_distance);
+                    for (int i=0; i<2; i++) {
+                        if (neutron.getPosition(i) > 2.0001
+                                or neutron.getPosition(i) < -2.0001) {
+/*
+                            std::cout << "end " << end.getX() << " "
+                                << end.getY() << " "
+                                << end.getZ() << std::endl;
+                            std::cout << "start " << start.getX() << " "
+                                << start.getY() << " "
+                                << start.getZ() << std::endl;
+                            std::cout << "neutron distance "
+                                << neutron_distance << std::endl;
+                            std::cout << "length "
+                                << length << std::endl;
+                            neutron.move(-neutron_distance);
+                            std::cout
+                                << "----------------------premove position "
+                                << neutron.getPosition(0) <<
+                                " " << neutron.getPosition(1) <<
+                                " " << neutron.getPosition(2) << std::endl;
+                            neutron.move(neutron_distance);
+                            std::cout
+                                << "------------------------------position "
+                                << neutron.getPosition(0) <<
+                                " " << neutron.getPosition(1) <<
+                                " " << neutron.getPosition(2) << std::endl;
+   */
+                         }
+                    }
+                    neutron_distance = 0;
+                    break;
+                }
+            } // while curr != null
+
+            // find out which boundary the neutron is on
+            std::vector <int> box_lim_bound;
+            box_lim_bound.clear();
+            if (std::abs(neutron.getPosition(0)
+                        - bounds.getSurfaceCoord(0, 0)) < BOUNDARY_ERROR) {
+                // std::cout << "hit boundary 0\n";
+                box_lim_bound.push_back(0);
+            }
+            if (std::abs(neutron.getPosition(0)
+                        - bounds.getSurfaceCoord(0, 1)) < BOUNDARY_ERROR) { 
+               // std::cout << "hit boundary 1\n";
+                box_lim_bound.push_back(1);
+            }
+            if (std::abs(neutron.getPosition(1)
+                        - bounds.getSurfaceCoord(1, 0)) < BOUNDARY_ERROR) {
+               // std::cout << "hit boundary 2\n";
+                box_lim_bound.push_back(2);
+            }
+            if (std::abs(neutron.getPosition(1)
+                        - bounds.getSurfaceCoord(1, 1)) < BOUNDARY_ERROR) {
+               // std::cout << "hit boundary 3\n";
+                box_lim_bound.push_back(3);
+            }
+
+            // check boundary conditions on all hit surfaces
+            for (int sur_side=0; sur_side <6; ++sur_side) {
+                int axis = sur_side/2;
+                int side = sur_side%2;
+
+                // if sur_side is in box_lim_bound
+                if (std::find(box_lim_bound.begin(),
+                            box_lim_bound.end(),sur_side)
+                        != box_lim_bound.end()) {
+
+                    // if the neutron is reflected
+                    if (bounds.getSurfaceType(axis, side) == 1) {
+                        neutron.reflect(axis);
+
+                        // place neutron on boundary to 
+                        // eliminate roundoff error
+                        double bound_val;
+                        bound_val = bounds.getSurfaceCoord(axis, side);
+                        neutron.setPosition(axis, bound_val);
+                    }
+
+                    // if the neutron escapes
+                    if (bounds.getSurfaceType(axis, side) == 0) {
+                        neutron.kill();
+                        neutron_distance = 0;
+                        tallies[LEAKS] += 1;
+                        break;
+                    }
+                }
+            } // check boundary conditions
+        } // while distance > 0
+
+        // this is where to go when distance is up
+
+//-----------------------------------------------------------------------------
+/*
+
         // track neutron until collision or leakage
         while (neutron_distance > BOUNDARY_ERROR) {
             neutron.getPositionVector(neutron_position);
@@ -179,6 +348,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             cell_mins[0] = lattice->getMinX() + cell[0] * lattice->getWidthX();
             cell_mins[1] = lattice->getMinY() + cell[1] * lattice->getWidthY();
             cell_mins[2] = lattice->getMinZ() + cell[2] * lattice->getWidthZ();
+            std::cout << "cell mins in z " << cell_mins[2] << std::endl;
             cell_maxes[0] = lattice->getMinX() + 
                 (cell[0] + 1) * lattice->getWidthX();
             cell_maxes[1] = lattice->getMinY() + 
@@ -245,7 +415,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             neutron_distance -= tempd;
 
             // determine potential geometry boundaries
-            for (int sur_side=0; sur_side <6; ++sur_side) {
+            for (int sur_side=0; sur_side <4; ++sur_side) {
                 int axis = sur_side/2;
                 int side = sur_side%2;
 
@@ -311,7 +481,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             if (neutron_distance > 0) {
                 cell[0] = lattice->getLatX(neutron_position);
                 cell[1] = lattice->getLatY(neutron_position);
-                cell[2] = lattice->getLatZ(neutron_position);
+                //cell[2] = lattice->getLatZ(neutron_position);
                 
                 // nudge neutron and find its cell
                 neutron.move(1e-3);
@@ -321,13 +491,14 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 if (lattice->withinBounds(neutron_position)) {
                     cell[0] = lattice->getLatX(neutron_position);
                     cell[1] = lattice->getLatY(neutron_position);
-                    cell[2] = lattice->getLatZ(neutron_position);
+                    //cell[2] = lattice->getLatZ(neutron_position);
                 }
                 neutron.move(-1e-3);
   
                 neutron.setCell(cell);
             }
         }
+    */
 
         // check interaction
         if (neutron.alive()) {
@@ -411,9 +582,9 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
 
                 // end neutron history
                 neutron.kill();
-            }
-        }
-    }
+            } // absorption event
+        } // if neutron alive
+    } // while neutron alive
     
     delete neutron_coord_position;
 
@@ -423,3 +594,31 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     tallies[CROWS] += crow_distance;
     tallies[NUM_CROWS] += 1;
 }
+
+
+
+
+
+/*
+
+cal coords set phi should be the azimuthal angle
+429 
+430     basically use what's in geometry.segmetize
+431     copy and paste from Use a local coorsd fro the statrt and end
+432     to create a new track segment
+433 
+434     create neutron
+435     curr = find first cell
+436     while distance < total distance left to travel and neutron alive
+437         while curr != null
+438         LocaCoords end;
+439         find next cell
+440 
+441         check boundaries
+442             reflect/kill
+443 
+444     look at cpusolver.h and .cpp when making plot.
+445     Monte carlo solver will be subclass of solver
+446 
+
+*/
