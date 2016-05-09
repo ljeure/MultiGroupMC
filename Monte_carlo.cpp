@@ -123,6 +123,11 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     // get lattice cell
     Point* neutron_starting_point;
     neutron.getPositionVector(neutron_starting_point);
+                            std::cout
+                                << "----------------------starting position "
+                                << neutron.getPosition(0) <<
+                                " " << neutron.getPosition(1) <<
+                                " " << neutron.getPosition(2) << std::endl;
 
     std::vector <int> cell (3);
     cell[0] = lattice->getLatX(neutron_starting_point);
@@ -167,9 +172,9 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         // track neutron until collision or escape
         while (neutron_distance > 0.000001) {
 
-            double x0 = neutron_position->getX();
-            double y0 = neutron_position->getY();
-            double z0 = neutron_position->getZ();
+            double x0 = neutron.getPosition(0);
+            double y0 = neutron.getPosition(1);
+            double z0 = neutron.getPosition(2);
             double phi =
                 atan(neutron.getDirection(1)/neutron.getDirection(0));
             FP_PRECISION length;
@@ -204,7 +209,11 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 // Find the next Cell along the Track's trajectory
                 prev = curr;
                 curr = geometry->findNextCell(&end);
-
+/*                std::cout << "prev cell = " << prev->getMinX() << " "
+                    << prev->getMinY() << std::endl;
+                std::cout << "curr cell = " << curr->getMinX() << " "
+                    << curr->getMinY() << std::endl;
+*/
                 // Checks that segment does not have the same
                 // start and end Points 
                 if (start.getX() == end.getX()
@@ -221,12 +230,15 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 //std::cout << "length " << length << std::endl;
                 fsr_id = geometry->findFSRId(&start);
     
-                            std::cout << "end " << end.getX() << " "
+                //std::cout << "neutron distance "
+                //    << neutron_distance << std::endl;
+                std::cout << "start " << start.getX() << " "
+                    << start.getY() << " "
+                    << start.getZ() << std::endl;
+                            std::cout << "end   " << end.getX() << " "
                                 << end.getY() << " "
                                 << end.getZ() << std::endl;
-                            std::cout << "start " << start.getX() << " "
-                                << start.getY() << " "
-                                << start.getZ() << std::endl;
+
                 // if neutron's path doesn't end in this cell
                 if (length < neutron_distance) {
 
@@ -242,7 +254,15 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 // if the neutron's path ends in this cell
                 else {
                     flux.add(neutron.getGroup(), fsr_id, length);
-                    neutron.move(neutron_distance);
+                    neutron.move(-neutron_distance);
+                //            std::cout << "neutron distance "
+                //                << neutron_distance << std::endl;
+                std::cout
+                    << "inside postmove position "
+                    << neutron.getPosition(0) <<
+                    " " << neutron.getPosition(1) <<
+                    " " << neutron.getPosition(2) << std::endl << std::endl;
+      
                     for (int i=0; i<2; i++) {
                         if (neutron.getPosition(i) > 2.0001
                                 or neutron.getPosition(i) < -2.0001) {
@@ -273,8 +293,20 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                          }
                     }
                     neutron_distance = 0;
-                    break;
+                    
+                    // break out of while (curr!= null)
+                    curr = NULL;
+
+                    //break;
+
                 }
+                /*
+                std::cout
+                    << "postmove position "
+                    << neutron.getPosition(0) <<
+                    " " << neutron.getPosition(1) <<
+                    " " << neutron.getPosition(2) << std::endl << std::endl;
+         */
             } // while curr != null
 
             // find out which boundary the neutron is on
@@ -282,22 +314,22 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             box_lim_bound.clear();
             if (std::abs(neutron.getPosition(0)
                         - bounds.getSurfaceCoord(0, 0)) < BOUNDARY_ERROR) {
-                // std::cout << "hit boundary 0\n";
+                 std::cout << "hit boundary 0\n";
                 box_lim_bound.push_back(0);
             }
             if (std::abs(neutron.getPosition(0)
                         - bounds.getSurfaceCoord(0, 1)) < BOUNDARY_ERROR) { 
-               // std::cout << "hit boundary 1\n";
+                std::cout << "hit boundary 1\n";
                 box_lim_bound.push_back(1);
             }
             if (std::abs(neutron.getPosition(1)
                         - bounds.getSurfaceCoord(1, 0)) < BOUNDARY_ERROR) {
-               // std::cout << "hit boundary 2\n";
+                std::cout << "hit boundary 2\n";
                 box_lim_bound.push_back(2);
             }
             if (std::abs(neutron.getPosition(1)
                         - bounds.getSurfaceCoord(1, 1)) < BOUNDARY_ERROR) {
-               // std::cout << "hit boundary 3\n";
+                std::cout << "hit boundary 3\n";
                 box_lim_bound.push_back(3);
             }
 
@@ -314,6 +346,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                     // if the neutron is reflected
                     if (bounds.getSurfaceType(axis, side) == 1) {
                         neutron.reflect(axis);
+                        std::cout << "-----------neutron reflected off " << axis
+                            << std::endl;
 
                         // place neutron on boundary to 
                         // eliminate roundoff error
@@ -324,6 +358,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
 
                     // if the neutron escapes
                     if (bounds.getSurfaceType(axis, side) == 0) {
+                        std::cout << "---------------neutron escapes \n";
                         neutron.kill();
                         neutron_distance = 0;
                         tallies[LEAKS] += 1;
@@ -407,7 +442,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             neutron_coord_position->setY((cell_mins[1] + cell_maxes[1])/2.);
             neutron_coord_position->setZ((cell_mins[2] + cell_maxes[2])/2.);
             neutron_coord_position->setUniverse(root_universe);
-            geometry->findFirstCell(neutron_coord_position);
+            geometry->findNextCell(neutron_coord_position);
             int fsr = geometry->findFSRId(neutron_coord_position);
             flux.add(neutron.getGroup(), fsr, tempd);
 
@@ -534,6 +569,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
                 // sample scattered direction
                 neutron.sampleDirection();
 
+                std::cout << "--------------neutron scatters\n";
+
                 // sample new energy group
                 int new_group = neutron.sampleScatteredGroup(sigma_s_group,
                     group);
@@ -595,10 +632,6 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     tallies[NUM_CROWS] += 1;
 }
 
-
-
-
-
 /*
 
 cal coords set phi should be the azimuthal angle
@@ -621,4 +654,25 @@ cal coords set phi should be the azimuthal angle
 445     Monte carlo solver will be subclass of solver
 446 
 
+=======
+/*
+   local coords set phi should be the azimuthal angle
+
+    basically use what's in geometry.segmetize
+    copy and paste from Use a local coorsd fro the statrt and end
+    to create a new track segment
+
+    create neutron
+    curr = find first cell
+    while distance < total distance left to travel and neutron alive
+        while curr != null
+        LocaCoords end;
+        find next cell
+
+        check boundaries
+            reflect/kill
+
+    look at cpusolver.h and .cpp when making plot.
+    Monte carlo solver will be subclass of solver
+>>>>>>> working
 */
