@@ -37,8 +37,8 @@ def plot_heat_map(flux_data, index, repeat = 100, title=''):
     plt.colorbar()
     plt.title(title)
     plt.show(title)
-
-with open('flux_plot.txt', 'r') as fh:
+    
+with open('flux_fsr_plot.txt', 'r') as fh:
     flux_file = fh.read().replace('\n', '')
     flux_list = flux_file.split()
 

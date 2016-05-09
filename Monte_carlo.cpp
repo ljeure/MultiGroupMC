@@ -15,24 +15,17 @@
             about the material
  @param     bounds a Boundaries object containing the limits of the
             bounding box
- @param     mesh a Mesh object containing information about the mesh
+ @param     flux a Flux object containing information about the flux
  @param     num_batches the number of batches to be tested
  @param     num_groups the number of neutron energy groups
 */
 void generateNeutronHistories(int n_histories, Boundaries bounds,
-        Mesh &mesh, Lattice* lattice, int num_batches, int num_groups,
+        Flux &flux, Lattice* lattice, int num_batches, int num_groups,
         Geometry* geometry, Universe* root_universe) {
 
     // initialize fsid
     geometry->initializeFSRs();
     
-    // test fsrid
-    LocalCoords* test = new LocalCoords(.1,.1,.1);
-    Universe* fuel_uni = geometry->getAllUniverses()[1];
-    test->setUniverse(fuel_uni);
-    Cell* fuel_cell = fuel_uni->getCell(1);
-    test->setCell(fuel_cell);
-
     // create arrays for tallies and fissions
     std::vector <Tally> tallies(5);
     Fission fission_banks;
@@ -42,7 +35,7 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
     for (int batch=1; batch <= num_batches; ++batch) {
 
         // clear flux data
-        mesh.fluxClear();
+        flux.clear();
 
         // assign new fission locations to old fission locations
         fission_banks.newBatch();
@@ -54,7 +47,7 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
 
         // simulate neutron behavior
         for (int i=0; i<n_histories; ++i) {
-            transportNeutron(bounds, tallies, first_round, mesh, lattice,
+            transportNeutron(bounds, tallies, first_round, flux, lattice,
                     &fission_banks, num_groups, i, root_universe,
                     geometry);
         }
@@ -99,7 +92,7 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
             of the bounding box
  @param     tallies a dictionary containing tallies of crow distances,
             leakages, absorptions, and fissions
- @param     mesh a Mesh object containing information about the mesh
+ @param     flux a Flux object containing information about the flux
  @param     old_fission_banks containing the old fission bank
  @param     new_fission_banks containing the new fission bank
  @param     num_groups the number of neutron energy groups
@@ -108,13 +101,14 @@ void generateNeutronHistories(int n_histories, Boundaries bounds,
             boundaries along the z axis since OpenMOC only handles 2D geometries
 */
 void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
-        bool first_round, Mesh &mesh, Lattice* lattice, Fission* fission_banks,
+        bool first_round, Flux &flux, Lattice* lattice, Fission* fission_banks,
         int num_groups, int neutron_num, Universe* root_universe,
         Geometry* geometry) {
 
     const double BOUNDARY_ERROR = 1e-10;
     
     Point* neutron_position = new Point();
+    //Point* neutron_position;
     
     // new way to sample neutron and set its direction
     Neutron neutron(neutron_num);
@@ -127,7 +121,7 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         fission_banks->sampleSite(&neutron);
     }
 
-    // get mesh cell
+    // get lattice cell
     Point* neutron_starting_point;
     neutron.getPositionVector(neutron_starting_point);
 
@@ -168,7 +162,6 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
         cell_obj = geometry->findCellContainingCoords(neutron_coord_position);
         cell_mat = cell_obj->getFillMaterial();
         
-        //cell_mat = mesh.getMaterial(cell);
         group = neutron.getGroup();
         double neutron_distance;
 
@@ -239,8 +232,14 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             // move neutron
             neutron.move(tempd);
 
-            // add distance to cell flux
-            mesh.fluxAdd(cell, tempd, group);
+            // add distance to fsr flux
+            neutron_coord_position->setX((cell_mins[0] + cell_maxes[0])/2.);
+            neutron_coord_position->setY((cell_mins[1] + cell_maxes[1])/2.);
+            neutron_coord_position->setZ((cell_mins[2] + cell_maxes[2])/2.);
+            neutron_coord_position->setUniverse(root_universe);
+            geometry->findNextCell(neutron_coord_position);
+            int fsr = geometry->findFSRId(neutron_coord_position);
+            flux.add(neutron.getGroup(), fsr, tempd);
 
             // shorten neutron distance to collision
             neutron_distance -= tempd;
@@ -415,6 +414,8 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
             }
         }
     }
+    
+    delete neutron_coord_position;
 
     // tally crow distance
     double crow_distance;
@@ -422,3 +423,24 @@ void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
     tallies[CROWS] += crow_distance;
     tallies[NUM_CROWS] += 1;
 }
+
+/*
+   local coords set phi should be the azimuthal angle
+
+    basically use what's in geometry.segmetize
+    copy and paste from Use a local coorsd fro the statrt and end
+    to create a new track segment
+
+    create neutron
+    curr = find first cell
+    while distance < total distance left to travel and neutron alive
+        while curr != null
+        LocaCoords end;
+        find next cell
+
+        check boundaries
+            reflect/kill
+
+    look at cpusolver.h and .cpp when making plot.
+    Monte carlo solver will be subclass of solver
+*/

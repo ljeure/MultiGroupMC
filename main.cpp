@@ -11,10 +11,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-//#include "Surface.h"
 #include "Boundaries.h"
 #include "Tally.h"
-#include "Mesh.h"
+#include "Flux.h"
 #include "Plotter.h"
 #include "Neutron.h"
 #include "Monte_carlo.h"
@@ -23,7 +22,6 @@
 #include "../../OpenMOC/src/Cell.h"
 #include "../../OpenMOC/src/Universe.h"
 #include "../../OpenMOC/src/Geometry.h"
-
 
 int main() {
 
@@ -132,9 +130,7 @@ int main() {
     // create geometry
     Geometry* geometry = new Geometry();
     geometry->setRootUniverse(root_universe);
-
-
-    /**
+    
     // add FSR points to geometry
     for (int i=0; i<lattice->getNumX(); ++i) {
         double xPos = lattice->getMinX() + lattice->getWidthX()*(i + .5);
@@ -156,8 +152,7 @@ int main() {
             }
         }
     }
-    */
-
+    
 //----------------------------------------------------------------------------//
     
     // create geometry with surfaces
@@ -175,28 +170,45 @@ int main() {
     test_boundary.setSurface(Z, MAX, root_cell->getMaxZ(), REFLECTIVE);
     test_boundary.setSurface(Z, MIN, root_cell->getMinZ(), REFLECTIVE);
 
-    // create mesh
-    Mesh test_mesh(test_boundary, lattice->getNumX(), lattice->getNumY(),
-            lattice->getNumZ(), fuel->getNumEnergyGroups());
+    // create flux
+    Flux test_flux(geometry->getNumFSRs(), fuel->getNumEnergyGroups());
 
 //----------------------------------------------------------------------------//
-
     
     // simulate neutron histories
-    int num_neutrons = 10000;
+    int num_neutrons = 1000;
     int num_batches = 3;
     
-    generateNeutronHistories(num_neutrons, test_boundary, test_mesh, lattice,
+    generateNeutronHistories(num_neutrons, test_boundary, test_flux, lattice,
             num_batches, num_groups, geometry, root_universe);
     
     // plot neutron flux
-    std::vector <std::vector <std::vector <std::vector <double> > > > flux =
-       test_mesh.getFlux();
+    std::vector <double> flux= test_flux.getFlux();
     printFluxToFile(flux);
 
     // run python script to get flux plots
     system("python Flux_parser.py");
 
     std::cout << std::endl;
+
+    delete geometry;
+    delete x_min;
+    delete x_max;
+    delete y_min;
+    delete y_max;
+    delete z_min;
+    delete z_max;
+/*  
+    get seg faults when I try to delete these
+    delete lattice;
+    delete fuel_cell;
+    delete moderator_cell;
+    delete fuel_universe;
+    delete moderator_universe;
+    delete root_universe;
+    delete moderator;
+    delete fuel;
+*/
+
     return 0;
 }

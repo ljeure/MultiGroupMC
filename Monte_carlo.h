@@ -21,8 +21,9 @@
 #include "../../OpenMOC/src/LocalCoords.h"
 
 #include "Enumerations.h"
+#include "Boundaries.h"
 #include "Tally.h"
-#include "Mesh.h"
+#include "Flux.h"
 #include "Neutron.h"
 #include "Fission.h"
 
@@ -30,11 +31,11 @@ enum tally_names {CROWS, NUM_CROWS, LEAKS, ABSORPTIONS, FISSIONS};
 enum fission_bank_names {OLD, NEW};
 
 void generateNeutronHistories(int n_histories, Boundaries bounds,
-        Mesh &mesh, Lattice* lattice, int num_batches, int num_groups,
+        Flux &flux, Lattice* lattice, int num_batches, int num_groups,
         Geometry* geometry, Universe* root_universe);
 
 void transportNeutron(Boundaries bounds, std::vector <Tally> &tallies,
-        bool first_round, Mesh &mesh, Lattice* lattice, Fission* fission_banks,
+        bool first_round, Flux &flux, Lattice* lattice, Fission* fission_banks,
         int num_groups, int neutron_num, Universe* root_universe,
         Geometry* geometry);
 
