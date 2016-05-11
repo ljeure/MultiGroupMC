@@ -4,12 +4,11 @@ DEBUG = yes
 
 headers = $(source:.cpp=.h)
 source = Boundaries.cpp
-#source += Surface.cpp
 source += main.cpp
 source += Tally.cpp
 source += Neutron.cpp
 source += Flux.cpp
-source += Monte_carlo.cpp
+source += Monte_carlo_solver.cpp
 source += Plotter.cpp
 source += Fission.cpp
 source += Enumerations.cpp
@@ -27,6 +26,10 @@ source += ../../OpenMOC/src/Matrix.cpp
 source += ../../OpenMOC/src/Cmfd.cpp
 source += ../../OpenMOC/src/Track.cpp
 source += ../../OpenMOC/src/PolarQuad.cpp
+source += ../../OpenMOC/src/ExpEvaluator.cpp
+source += ../../OpenMOC/src/TrackGenerator.cpp
+source += ../../OpenMOC/src/Solver.cpp
+source += ../../OpenMOC/src/Timer.cpp
 
 obj = $(source:.cpp=.o)
 

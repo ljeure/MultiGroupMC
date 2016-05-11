@@ -16,7 +16,7 @@
 #include "Flux.h"
 #include "Plotter.h"
 #include "Neutron.h"
-#include "Monte_carlo.h"
+#include "Monte_carlo_solver.h"
 #include "../../OpenMOC/src/Universe.h"
 #include "../../OpenMOC/src/Material.h"
 #include "../../OpenMOC/src/Cell.h"
@@ -179,9 +179,10 @@ int main() {
     int num_neutrons = 1000;
     int num_batches = 3;
     
-    generateNeutronHistories(num_neutrons, test_boundary, test_flux, lattice,
-            num_batches, num_groups, geometry, root_universe);
-    
+    MCSolver solver;
+    solver.generateNeutronHistories(num_neutrons, test_boundary, test_flux, 
+            lattice, num_batches, num_groups, geometry, root_universe);
+
     // plot neutron flux
     std::vector <double> flux= test_flux.getFlux();
     printFluxToFile(flux);
