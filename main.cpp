@@ -146,12 +146,12 @@ int main() {
                 geometry->findFirstCell(localCoordFSR);
                 
                 int fsr = geometry->findFSRId(localCoordFSR);
-                geometry->initializeFSRVectors();
 
                 delete localCoordFSR;
             }
         }
     }
+    geometry->initializeFSRVectors();
     
 //----------------------------------------------------------------------------//
     
@@ -212,3 +212,27 @@ int main() {
 
     return 0;
 }
+
+
+
+/*
+   make monte carlo a solver
+   should have same inputs as cpu solver + num_neutrons
+
+   cpu has comput.eval
+   MC should have compute eval (num_inters)
+
+   look at cpusolver.h/.cpp, solver.h/.cpp
+
+
+    
+    cpu solver is sublcass of solver
+    monte carlo solver is also a sublcass of solver
+
+   for solver:
+   if it has memberFunction() = 0;
+    I need memberFunction( same parameters) {
+         return 0 or NULL or whatever;}
+
+*/
+
