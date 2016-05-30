@@ -24,16 +24,6 @@
 
 int main() {
 
-    // create openmoc surfaces and set their boundary types
-    XPlane* x_min = new XPlane(-2.0, 0, "x_min");
-    XPlane* x_max = new XPlane(2.0, 1, "x_max");
-    YPlane* y_min = new YPlane(-2.0, 2, "y_min");
-    YPlane* y_max = new YPlane(2.0, 3, "y_max");
-    x_min->setBoundaryType(VACUUM);
-    x_max->setBoundaryType(VACUUM);
-    y_min->setBoundaryType(VACUUM);
-    y_max->setBoundaryType(VACUUM);
-
     // number of energy groups
     int num_groups = 2;
     
@@ -69,6 +59,17 @@ int main() {
     moderator->setChiByGroup(0.0, 1);
     moderator->setChiByGroup(0.0, 2);
 
+    // create openmoc surfaces and set their boundary types
+    XPlane* x_min = new XPlane(-2.0, 0, "x_min");
+    XPlane* x_max = new XPlane(2.0, 1, "x_max");
+    YPlane* y_min = new YPlane(-2.0, 2, "y_min");
+    YPlane* y_max = new YPlane(2.0, 3, "y_max");
+
+    x_min->setBoundaryType(VACUUM);
+    x_max->setBoundaryType(VACUUM);
+    y_min->setBoundaryType(VACUUM);
+    y_max->setBoundaryType(VACUUM);
+
     // create cells
     Cell* root_cell = new Cell(0, "root");
     root_cell->addSurface(1, x_min);
@@ -93,29 +94,32 @@ int main() {
     fuel_universe->addCell(fuel_cell);
 
     // create lattice
-    int numXLat = 9;
-    int numYLat = 9;
-    int numZLat = 1;
+    const int numXLat = 9;
+    const int numYLat = 9;
+    const int numZLat = 1;
     Lattice* lattice = new Lattice();
     lattice->setWidth(4.0/9.0, 4.0/9.0);
 
-    // create universe array for input into lattice
-    Universe* universe_array [numXLat*numYLat];
-    for (int i=0; i<numXLat; ++i) {
-        for (int j=0; j<numYLat; ++j) {
-            universe_array[j*numXLat+i] = moderator_universe;
-        }
-    }
-    for (int i=3; i<6; ++i) {
-        for (int j=3; j<6; ++j) {
-            universe_array[j*numXLat+i] = fuel_universe;
-        }
-    }
-    Universe** universe_array_pointer;
-    universe_array_pointer = universe_array;
+    // fill latice with universes
+    Universe* matrix[numXLat*numYLat];
+    
+        int mold[numXLat*numYLat] = {   1, 1, 1, 1, 1, 1, 1, 1, 1, 
+                                        1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                        1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                        1, 1, 1, 2, 2, 2, 1, 1, 1,
+                                        1, 1, 1, 2, 2, 2, 1, 1, 1,
+                                        1, 1, 1, 2, 2, 2, 1, 1, 1,
+                                        1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                        1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                        1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-    // set universes in lattice
-    lattice->setUniverses(numZLat, numYLat, numXLat, universe_array_pointer);
+        std::map<int, Universe*> names = {{1, moderator_universe},
+                {2, fuel_universe}};
+        for (int n=0; n<numXLat*numYLat; n++)
+                matrix[n] = names[mold[n]];
+
+        lattice->setUniverses(numZLat, numYLat, numXLat, matrix);
+    
 
     // fill root cell with lattice
     root_cell->setFill(lattice);
@@ -141,7 +145,6 @@ int main() {
 
     // simulate neutrons
     solver.computeEigenValue(num_neutrons, num_batches, num_groups);
-    std::cout << "gets here\n";
 
     // plot neutron flux
     std::vector <double> flux = solver.getFlux()->getFlux();
@@ -157,17 +160,6 @@ int main() {
     delete x_max;
     delete y_min;
     delete y_max;
-/*  
-    get seg faults when I try to delete these
-    delete lattice;
-    delete fuel_cell;
-    delete moderator_cell;
-    delete fuel_universe;
-    delete moderator_universe;
-    delete root_universe;
-    delete moderator;
-    delete fuel;
-*/
 
     return 0;
 }
