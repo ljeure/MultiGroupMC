@@ -3,8 +3,7 @@ program = monte_carlo
 DEBUG = yes
 
 headers = $(source:.cpp=.h)
-source = Boundaries.cpp
-source += main.cpp
+source = main.cpp
 source += Tally.cpp
 source += Neutron.cpp
 source += Flux.cpp

@@ -11,7 +11,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "Boundaries.h"
 #include "Tally.h"
 #include "Flux.h"
 #include "Plotter.h"
@@ -30,14 +29,10 @@ int main() {
     XPlane* x_max = new XPlane(2.0, 1, "x_max");
     YPlane* y_min = new YPlane(-2.0, 2, "y_min");
     YPlane* y_max = new YPlane(2.0, 3, "y_max");
-//    ZPlane* z_min = new ZPlane(-2.0, 4, "z_min");
-//    ZPlane* z_max = new ZPlane(2.0, 5, "z_max");
     x_min->setBoundaryType(VACUUM);
     x_max->setBoundaryType(VACUUM);
     y_min->setBoundaryType(VACUUM);
     y_max->setBoundaryType(VACUUM);
-//    z_min->setBoundaryType(REFLECTIVE);
-//    z_max->setBoundaryType(REFLECTIVE);
 
     // number of energy groups
     int num_groups = 2;
@@ -80,8 +75,6 @@ int main() {
     root_cell->addSurface(-1, x_max);
     root_cell->addSurface(1, y_min);
     root_cell->addSurface(-1, y_max);
-//    root_cell->addSurface(1, z_min);
-//    root_cell->addSurface(-1, z_max);
     
     Cell* moderator_cell = new Cell(1, "moderator");
     moderator_cell->setFill(moderator);
@@ -95,7 +88,7 @@ int main() {
 
     Universe* moderator_universe = new Universe(1, "moderator universe");
     moderator_universe->addCell(moderator_cell);
-    
+
     Universe* fuel_universe = new Universe(2, "fuel universe");
     fuel_universe->addCell(fuel_cell);
 
@@ -105,7 +98,7 @@ int main() {
     int numZLat = 1;
     Lattice* lattice = new Lattice();
     lattice->setWidth(4.0/9.0, 4.0/9.0);
-    
+
     // create universe array for input into lattice
     Universe* universe_array [numXLat*numYLat];
     for (int i=0; i<numXLat; ++i) {
@@ -131,60 +124,27 @@ int main() {
     Geometry* geometry = new Geometry();
     geometry->setRootUniverse(root_universe);
     
-    // add FSR points to geometry
-    for (int i=0; i<lattice->getNumX(); ++i) {
-        double xPos = lattice->getMinX() + lattice->getWidthX()*(i + .5);
-        
-        for (int j=0; j<lattice->getNumX(); ++j) {
-            double yPos = lattice->getMinY() + lattice->getWidthY()*(j + .5);
-        
-            for (int k=0; k<lattice->getNumZ(); ++k) {
-                double zPos = lattice->getMinZ()
-                    + lattice->getWidthZ()*(k + .5);
-                LocalCoords* localCoordFSR = new LocalCoords(xPos, yPos, zPos);
-                localCoordFSR->setUniverse(root_universe);
-                geometry->findFirstCell(localCoordFSR);
-                
-                int fsr = geometry->findFSRId(localCoordFSR);
-
-                delete localCoordFSR;
-            }
-        }
-    }
-    geometry->initializeFSRVectors();
-    
 //----------------------------------------------------------------------------//
-    
-    // create geometry with surfaces
-    // z boundaries are automatically reflective because OpenMOC doesn't
-    // support 3D
-    Boundaries test_boundary;
-    test_boundary.setSurface(X, MAX, root_cell->getMaxX(),
-            root_cell->getMaxXBoundaryType());
-    test_boundary.setSurface(X, MIN, root_cell->getMinX(),
-            root_cell->getMinXBoundaryType());
-    test_boundary.setSurface(Y, MAX, root_cell->getMaxY(),
-            root_cell->getMaxYBoundaryType());
-    test_boundary.setSurface(Y, MIN, root_cell->getMinY(),
-            root_cell->getMinYBoundaryType());
-//    test_boundary.setSurface(Z, MAX, root_cell->getMaxZ(), REFLECTIVE);
-//    test_boundary.setSurface(Z, MIN, root_cell->getMinZ(), REFLECTIVE);
-
-    // create flux
-    Flux test_flux(geometry->getNumFSRs(), fuel->getNumEnergyGroups());
-
-//----------------------------------------------------------------------------//
-    
+   
     // simulate neutron histories
-    int num_neutrons = 1000;
+    int num_neutrons = 10000;
     int num_batches = 3;
     
+    // create solver
     MCSolver solver;
-    solver.computeEigenValue(num_neutrons, test_boundary, test_flux, 
-            lattice, num_batches, num_groups, geometry, root_universe);
+    solver.setGeometry(geometry);
+    solver.setRootCell(root_cell);
+
+    // initialize solver function
+    solver.initializeFSRs(lattice);
+    solver.initializeFlux();
+
+    // simulate neutrons
+    solver.computeEigenValue(num_neutrons, num_batches, num_groups);
+    std::cout << "gets here\n";
 
     // plot neutron flux
-    std::vector <double> flux= test_flux.getFlux();
+    std::vector <double> flux = solver.getFlux()->getFlux();
     printFluxToFile(flux);
 
     // run python script to get flux plots
@@ -197,8 +157,6 @@ int main() {
     delete x_max;
     delete y_min;
     delete y_max;
-//    delete z_min;
-//    delete z_max;
 /*  
     get seg faults when I try to delete these
     delete lattice;
@@ -213,3 +171,12 @@ int main() {
 
     return 0;
 }
+
+
+/*
+
+main should look like profile/models homogeneous
+
+   */
+
+

@@ -6,6 +6,8 @@
 */
 
 #include "Flux.h"
+#include <stdlib.h>
+#include <iostream>
 
 /*
  @brief     constructor for Flux class
