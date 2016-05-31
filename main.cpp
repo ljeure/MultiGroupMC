@@ -103,23 +103,22 @@ int main() {
     // fill latice with universes
     Universe* matrix[numXLat*numYLat];
     
-        int mold[numXLat*numYLat] = {   1, 1, 1, 1, 1, 1, 1, 1, 1, 
-                                        1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                        1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                        1, 1, 1, 2, 2, 2, 1, 1, 1,
-                                        1, 1, 1, 2, 2, 2, 1, 1, 1,
-                                        1, 1, 1, 2, 2, 2, 1, 1, 1,
-                                        1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                        1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                        1, 1, 1, 1, 1, 1, 1, 1, 1};
+    int mold[numXLat*numYLat] = {   1, 1, 1, 1, 1, 1, 1, 1, 1, 
+                                    1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                    1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                    1, 1, 1, 2, 2, 2, 1, 1, 1,
+                                    1, 1, 1, 2, 2, 2, 1, 1, 1,
+                                    1, 1, 1, 2, 2, 2, 1, 1, 1,
+                                    1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                    1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                    1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-        std::map<int, Universe*> names = {{1, moderator_universe},
-                {2, fuel_universe}};
-        for (int n=0; n<numXLat*numYLat; n++)
-                matrix[n] = names[mold[n]];
+    std::map<int, Universe*> names = {{1, moderator_universe},
+            {2, fuel_universe}};
+    for (int n=0; n<numXLat*numYLat; n++)
+            matrix[n] = names[mold[n]];
 
-        lattice->setUniverses(numZLat, numYLat, numXLat, matrix);
-    
+    lattice->setUniverses(numZLat, numYLat, numXLat, matrix);
 
     // fill root cell with lattice
     root_cell->setFill(lattice);
@@ -128,8 +127,6 @@ int main() {
     Geometry* geometry = new Geometry();
     geometry->setRootUniverse(root_universe);
     
-//----------------------------------------------------------------------------//
-   
     // simulate neutron histories
     int num_neutrons = 10000;
     int num_batches = 3;
@@ -163,12 +160,3 @@ int main() {
 
     return 0;
 }
-
-
-/*
-
-main should look like profile/models homogeneous
-
-   */
-
-
