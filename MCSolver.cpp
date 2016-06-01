@@ -1,11 +1,11 @@
 /*
- @file      Monte_carlo_solver.cpp
+ @file      MCSolver.cpp
  @brief     utility functions for monte carlo neutron simulation
  @author    Luke Eure
  @date      January 12 2016
 */
 
-#include "Monte_carlo_solver.h"
+#include "MCSolver.h"
 
 /*
  @brief     constructor for MCSolver
@@ -31,13 +31,9 @@ void MCSolver::setGeometry(Geometry* geometry) {
  @param     geometry the flux of the solver
 */
 void MCSolver::initializeFlux() {
-    Flux* flux =
-       new Flux(_geometry->getNumFSRs(), _geometry->getNumEnergyGroups());
-    _flux = flux;
-}
 
-Flux* MCSolver::getFlux(){
-    return _flux;
+    _scalar_flux = new FP_PRECISION 
+        [_geometry->getNumFSRs()*_geometry->getNumEnergyGroups()];
 }
     
 /*
@@ -65,7 +61,11 @@ void MCSolver::computeEigenValue(int n_histories, int num_batches,
     for (int batch=1; batch <= num_batches; ++batch) {
 
         // clear flux data
-        _flux->clear();
+        for (int i=0; i<_num_groups; ++i) {
+            for (int j=0; j<_geometry->getNumFSRs(); ++j) {
+                _scalar_flux(j,i) = 0.0;
+            }
+        }
 
         // assign new fission locations to old fission locations
         fission_banks.newBatch();
@@ -84,11 +84,13 @@ void MCSolver::computeEigenValue(int n_histories, int num_batches,
         // give results
         _k_eff = tallies[FISSIONS].getCount() /
             (tallies[LEAKS].getCount() + tallies[ABSORPTIONS].getCount());
-        double sumStandardDev = tallies[LEAKS].getStandardDeviation(n_histories)
-            + tallies[FISSIONS].getStandardDeviation(n_histories)
-            + tallies[ABSORPTIONS].getStandardDeviation(n_histories);
+
+        double sumStandardDev = tallies[LEAKS].getStandardDeviation()
+            + tallies[FISSIONS].getStandardDeviation()
+            + tallies[ABSORPTIONS].getStandardDeviation();
         std::cout << "\nFor batch " << batch << ", k = " << _k_eff
             << " with standard deviation of " << sumStandardDev << std::endl;
+
         double fissions;
         fissions = tallies[FISSIONS].getCount();
         std::cout << "fissions: " << fissions/fissions << std::endl;
@@ -96,7 +98,8 @@ void MCSolver::computeEigenValue(int n_histories, int num_batches,
             << std::endl;
         std::cout << "absorptions: " << tallies[ABSORPTIONS].getCount()/fissions
             << std::endl;
-            first_round = false;
+
+        first_round = false;
     }
     double mean_crow_distance = tallies[CROWS].getCount()
         / tallies[NUM_CROWS].getCount();
@@ -252,7 +255,7 @@ void MCSolver::transportNeutron(std::vector <Tally> &tallies,
 
                     // add distance travelled to flux, shorten distance and
                     // move neutron
-                    _flux->add(neutron.getGroup(), fsr_id, length);
+                    _scalar_flux(fsr_id, neutron.getGroup()) += length;
                     neutron_distance -= length;
                     neutron.setPosition(0, end.getX());
                     neutron.setPosition(1, end.getY());
@@ -261,7 +264,8 @@ void MCSolver::transportNeutron(std::vector <Tally> &tallies,
 
                 // if the neutron's path ends in this cell
                 else {
-                    _flux->add(neutron.getGroup(), fsr_id, length);
+                    _scalar_flux(fsr_id, neutron.getGroup())
+                        += neutron_distance;
                     neutron.move(neutron_distance);
                     neutron_distance = 0;
                     
@@ -457,9 +461,7 @@ Geometry* MCSolver::getGeometry() {
  @return    the neutron flux
 */
 FP_PRECISION MCSolver::getFlux(int fsr_id, int group) {
-    int num_fsrs = _geometry->getNumFSRs();
-    std::vector <double> flux_vect = _flux->getFlux();
-    return flux_vect[group*num_fsrs+fsr_id];
+    return _scalar_flux(_geometry->getNumFSRs(), _num_groups);
 }
 
 // functions that allow MCSolver to be compativle with Solver
@@ -493,11 +495,6 @@ void MCSolver::initializeFSRs(Lattice* lattice) {
     _num_groups = _geometry->getNumEnergyGroups();
     _num_materials = _geometry->getNumMaterials();
 
-    // loop over all FSRs to extract FSR material pointers
-    /*for (int r=0; r < _num_FSRs; r++) {
-        _FSR_materials[r]  = _geometry->findFSRMaterial(r);
-    }
-*/
     // add FSR points to geometry
     for (int i=0; i<lattice->getNumX(); ++i) {
         double xPos = lattice->getMinX() + lattice->getWidthX()*(i + .5);

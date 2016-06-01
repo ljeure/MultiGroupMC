@@ -23,6 +23,7 @@ Tally::~Tally() {}
 void Tally::clear() {
     _tally_count = 0;
     _tally_squared = 0;
+    _n = 0;
 }
  
 /*
@@ -35,12 +36,11 @@ double Tally::getCount() {
 
 /*
   @brief    returns the standard deviation from the amount held in the tally
-  @param    n the number of sampled data points
   @return   the standard deviation from the amount held in the tally
 */
-double Tally::getStandardDeviation(int n) {
+double Tally::getStandardDeviation() {
     double standardDev = 
-        _tally_squared/n - (_tally_count / n) * (_tally_count / n);
+        _tally_squared/_n - (_tally_count / _n) * (_tally_count / _n);
     return standardDev;
 }
 
@@ -52,5 +52,14 @@ double Tally::getStandardDeviation(int n) {
 Tally Tally::operator+=(double tally_addition) {
     _tally_count += tally_addition;
     _tally_squared += tally_addition * tally_addition;
+    _n++;
     return *this;
+}
+
+/*
+  @brief    returns the mean of all the entries into the tally
+  @return   the mean of all the entries into the tallyl
+*/
+double Tally::getMean() {
+    return _tally_count/_n;
 }

@@ -12,10 +12,9 @@
 #include <stdlib.h>
 
 #include "Tally.h"
-#include "Flux.h"
 #include "Plotter.h"
 #include "Neutron.h"
-#include "Monte_carlo_solver.h"
+#include "MCSolver.h"
 #include "../../OpenMOC/src/Universe.h"
 #include "../../OpenMOC/src/Material.h"
 #include "../../OpenMOC/src/Cell.h"
@@ -144,11 +143,11 @@ int main() {
     solver.computeEigenValue(num_neutrons, num_batches, num_groups);
 
     // plot neutron flux
-    std::vector <double> flux = solver.getFlux()->getFlux();
-    printFluxToFile(flux);
+//    std::vector <double> flux = solver.getFlux()->getFlux();
+//    printFluxToFile(flux);
 
     // run python script to get flux plots
-    system("python Flux_parser.py");
+//    system("python Flux_parser.py");
 
     std::cout << std::endl;
 

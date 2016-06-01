@@ -16,7 +16,8 @@ public:
     
     void clear();
     double getCount();
-    double getStandardDeviation(int n);
+    double getStandardDeviation();
+    double getMean();
     Tally operator+=(double tally_addition);
 
 private:
@@ -26,6 +27,9 @@ private:
 
     /** sum of squares of tallied amounts */
     double _tally_squared;
+
+    /** number of items added to the tally */
+    int _n;
 };
 
 #endif

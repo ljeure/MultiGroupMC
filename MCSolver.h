@@ -1,6 +1,6 @@
 /* 
- @file      Monte_carlo_solver.h
- @brief     monte_carlo class, a subclass of solver
+ @file      MCSolver.h
+ @brief     MCSolver class, a subclass of solver
  @author    Luke Eure
  @date      May 11 2016
 */
@@ -24,7 +24,6 @@
 
 #include "Enumerations.h"
 #include "Tally.h"
-#include "Flux.h"
 #include "Neutron.h"
 #include "Fission.h"
 
@@ -42,7 +41,6 @@ public:
     void setRootCell(Cell* root_cell);
     void initializeFlux();
     void initializeFSRs(Lattice* lattice);
-    Flux* getFlux();
 
     void sampleLocation(Neutron* neutron);
 
@@ -77,7 +75,6 @@ private:
 
     double _k_eff;
     Geometry* _geometry;
-    Flux* _flux;
     Universe* _root_universe;
     FP_PRECISION* _FSR_volumes;
     Material** _FSR_materials;
@@ -85,6 +82,7 @@ private:
     int _num_groups;
     int _num_FSRs;
     int _num_materials;
+    FP_PRECISION* _scalar_flux;
 
 };
 

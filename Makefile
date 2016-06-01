@@ -6,8 +6,7 @@ headers = $(source:.cpp=.h)
 source = main.cpp
 source += Tally.cpp
 source += Neutron.cpp
-source += Flux.cpp
-source += Monte_carlo_solver.cpp
+source += MCSolver.cpp
 source += Plotter.cpp
 source += Fission.cpp
 source += Enumerations.cpp
